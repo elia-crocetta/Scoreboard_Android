@@ -5,8 +5,8 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
 import android.widget.TextView
-import android.widget.Toast
 import java.util.*
+import kotlin.concurrent.schedule
 
 class ScoreboardActivity : AppCompatActivity() {
 
@@ -20,6 +20,7 @@ class ScoreboardActivity : AppCompatActivity() {
     private var homePointValue: Int = 0
     private var awayPointValue: Int = 0
 
+    private lateinit var regularTimeTimer: CountDownTimer
     private var regularTimeTimerIsRunning = false
     private var valueTimer: Long = 0
 
@@ -37,6 +38,7 @@ class ScoreboardActivity : AppCompatActivity() {
         createHomePointTextView()
         createAwayPointTextView()
         createTimeTextView()
+        createExtraTimeCounter()
         additionalUpTextView = findViewById(R.id.additionalUpTextView)
         additionalBottomTextView = findViewById(R.id.additionalBottomTextView)
         additionalBottomTextView.text = ""
@@ -47,8 +49,12 @@ class ScoreboardActivity : AppCompatActivity() {
         homePointTextView = findViewById(R.id.homePointTextView)
         homePointTextView.isClickable = true
         homePointTextView.setOnClickListener {
-            homePointValue+=1
-            homePointTextView.text = "${homePointValue}"
+            if (regularTimeTimerIsRunning) {
+                regularTimeTimerIsRunning = false
+                homePointValue+=1
+                homePointTextView.text = "$homePointValue"
+                additionalUpTextView.text = getString(R.string.goal_home)
+            }
         }
     }
 
@@ -56,8 +62,12 @@ class ScoreboardActivity : AppCompatActivity() {
         awayPointTextView = findViewById(R.id.awayPointTextView)
         awayPointTextView.isClickable = true
         awayPointTextView.setOnClickListener {
-            awayPointValue+=1
-            awayPointTextView.text = "${awayPointValue}"
+            if (regularTimeTimerIsRunning) {
+                regularTimeTimerIsRunning = false
+                awayPointValue+=1
+                awayPointTextView.text = "$awayPointValue"
+                additionalUpTextView.text = getString(R.string.goal_away)
+            }
         }
     }
 
@@ -66,18 +76,57 @@ class ScoreboardActivity : AppCompatActivity() {
         timeTextView.isClickable = true
         timeTextView.setOnClickListener {
             regularTimeTimerIsRunning = !regularTimeTimerIsRunning
-
-            object : CountDownTimer(configuration.minutes - valueTimer, 1000) {
-                override fun onTick(millisUntilFinished: Long) {
-                    Log.d("TIMER", "${millisUntilFinished}")
-                    timeTextView.text = valueTimer.toString()
-                    valueTimer++
-                }
-                override fun onFinish() {
-                    additionalUpTextView.text = getString(R.string.half_time)
-                }
-            }
+            createRegularTimeCounter()
         }
     }
 
+    private fun createRegularTimeCounter() {
+        regularTimeTimer = object : CountDownTimer(configuration.minutes - valueTimer, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                if (regularTimeTimerIsRunning) {
+                    additionalUpTextView.text = getString(R.string.first_half)
+                    if (extraTimeTimerIsRunning) {
+                        extraTimeTimer.cancel()
+                        extraTimeTimerIsRunning = false
+                    }
+                    Log.d("TIMER", "$millisUntilFinished")
+                    val formatted = "${(valueTimer / 60).toString().padStart(2, '0')}:${(valueTimer % 60).toString().padStart(2, '0')}"
+                    timeTextView.text = formatted
+                    valueTimer++
+                } else {
+                    Log.d("TIMER", "Pause")
+                    cancel()
+                    if (!extraTimeTimerIsRunning) {
+                        extraTimeTimer.start()
+                        extraTimeTimerIsRunning = true
+                    }
+                }
+            }
+            override fun onFinish() {
+                additionalUpTextView.text = getString(R.string.half_time)
+            }
+        }
+        regularTimeTimer.start()
+    }
+
+    private fun createExtraTimeCounter() {
+        extraTimeTimer = object : CountDownTimer(300000, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                if (valueTimerExtra<300000) {
+                    Log.d("EXTRA-TIMER", "$valueTimerExtra")
+                    valueTimerExtra++
+                } else {
+                    Log.d("EXTRA-TIMER", "5 min max reached")
+                    cancel()
+                }
+            }
+            override fun onFinish() {}
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        regularTimeTimer.cancel()
+        extraTimeTimer.cancel()
+    }
 }
