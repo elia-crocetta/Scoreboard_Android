@@ -13,7 +13,7 @@
         android:id="@+id/textView4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="96dp"
+        android:layout_marginStart="32dp"
         android:layout_marginTop="56dp"
         android:text="@string/home"
         android:textColor="@color/white"
@@ -26,15 +26,15 @@
         android:id="@+id/additionalUpTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="17dp"
+        android:layout_marginTop="32dp"
         android:text="@string/kick_off"
         android:textAlignment="center"
         android:textColor="@color/white"
         android:textSize="34sp"
         android:textStyle="normal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView4" />
+        app:layout_constraintEnd_toStartOf="@+id/textView5"
+        app:layout_constraintStart_toEndOf="@+id/textView4"
+        app:layout_constraintTop_toTopOf="@+id/textView4" />
 
     <TextView
         android:id="@+id/additionalBottomTextView"
@@ -54,7 +54,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="56dp"
-        android:layout_marginEnd="120dp"
+        android:layout_marginEnd="32dp"
         android:text="@string/away"
         android:textColor="@color/white"
         android:textSize="48sp"
@@ -79,14 +79,14 @@
         android:id="@+id/timeTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="64dp"
         android:text="@string/init_timer"
         android:textColor="@color/white"
         android:textSize="60sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="@+id/additionalUpTextView"
         app:layout_constraintStart_toStartOf="@+id/additionalUpTextView"
-        app:layout_constraintTop_toBottomOf="@+id/additionalUpTextView" />
+        app:layout_constraintTop_toTopOf="@+id/homePointTextView" />
 
     <TextView
         android:id="@+id/awayPointTextView"

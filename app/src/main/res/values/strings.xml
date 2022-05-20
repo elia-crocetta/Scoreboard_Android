@@ -8,6 +8,7 @@
         <item>15 minuti</item>
         <item>10 minuti</item>
         <item>5 minuti</item>
+        <item>15 secondi</item>
     </string-array>
     <string name="proceed">Procedi</string>
     <string name="home">HOME</string>
@@ -17,10 +18,10 @@
     <string name="second_half">2nd Half</string>
     <string name="goal_home">GOOOL HOME!</string>
     <string name="goal_away">GOOOL AWAY!</string>
-    <string name="over_time">Over Time: +</string>
+    <string name="over_time">Over Time: +%1$s</string>
     <string name="half_time">Half time</string>
-    <string name="end_game">End game</string>
-    <string name="extra_time">End game</string>
+    <string name="end_game">End game\n%1$s</string>
+    <string name="extra_time">Extra time</string>
     <string name="home_wins">Home wins</string>
     <string name="tie">Tie</string>
     <string name="away_wins">Away wins</string>
