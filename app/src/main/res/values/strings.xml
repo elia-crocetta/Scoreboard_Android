@@ -29,4 +29,5 @@
     <string name="penalties">Penalties</string>
     <string name="zero">0</string>
     <string name="init_timer">00:00</string>
+    <string name="paused">Paused</string>
 </resources>

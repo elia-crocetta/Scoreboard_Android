@@ -5,8 +5,10 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
 import android.widget.TextView
-import java.util.*
-import kotlin.concurrent.schedule
+
+enum class MatchTime {
+    firstHalf, secondHalf, firstExtraHalf, secondExtraHalf, penalties, endGame
+}
 
 class ScoreboardActivity : AppCompatActivity() {
 
@@ -23,10 +25,13 @@ class ScoreboardActivity : AppCompatActivity() {
     private lateinit var regularTimeTimer: CountDownTimer
     private var regularTimeTimerIsRunning = false
     private var valueTimer: Long = 0
+    private var _millisUntilFinished: Long = Long.MIN_VALUE
 
     private lateinit var extraTimeTimer: CountDownTimer
     private var valueTimerExtra: Long = 0
     private var extraTimeTimerIsRunning = false
+
+    private var currentMatchTime: MatchTime = MatchTime.firstHalf
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,7 +58,7 @@ class ScoreboardActivity : AppCompatActivity() {
                 regularTimeTimerIsRunning = false
                 homePointValue+=1
                 homePointTextView.text = "$homePointValue"
-                additionalUpTextView.text = getString(R.string.goal_home)
+                additionalBottomTextView.text = getString(R.string.goal_home)
             }
         }
     }
@@ -66,7 +71,7 @@ class ScoreboardActivity : AppCompatActivity() {
                 regularTimeTimerIsRunning = false
                 awayPointValue+=1
                 awayPointTextView.text = "$awayPointValue"
-                additionalUpTextView.text = getString(R.string.goal_away)
+                additionalBottomTextView.text = getString(R.string.goal_away)
             }
         }
     }
@@ -75,24 +80,31 @@ class ScoreboardActivity : AppCompatActivity() {
         timeTextView = findViewById(R.id.timeTextView)
         timeTextView.isClickable = true
         timeTextView.setOnClickListener {
+            if (currentMatchTime == MatchTime.penalties || currentMatchTime == MatchTime.endGame) {
+                return@setOnClickListener
+            }
             regularTimeTimerIsRunning = !regularTimeTimerIsRunning
+            setAdditionalUpTextView()
             createRegularTimeCounter()
+            additionalBottomTextView.text = null
         }
     }
 
     private fun createRegularTimeCounter() {
-        regularTimeTimer = object : CountDownTimer(configuration.minutes - valueTimer, 1000) {
+        val time = if (_millisUntilFinished == Long.MIN_VALUE) configuration.minutes else {_millisUntilFinished}
+        regularTimeTimer = object : CountDownTimer(time, 1000) {
             override fun onTick(millisUntilFinished: Long) {
+                _millisUntilFinished = millisUntilFinished
                 if (regularTimeTimerIsRunning) {
-                    additionalUpTextView.text = getString(R.string.first_half)
                     if (extraTimeTimerIsRunning) {
                         extraTimeTimer.cancel()
                         extraTimeTimerIsRunning = false
                     }
-                    Log.d("TIMER", "$millisUntilFinished")
-                    val formatted = "${(valueTimer / 60).toString().padStart(2, '0')}:${(valueTimer % 60).toString().padStart(2, '0')}"
-                    timeTextView.text = formatted
                     valueTimer++
+                    val minutesMapped = map(valueTimer, 0, configuration.minutes, 0, 2700000)
+                    Log.d("TIMER", "$millisUntilFinished")
+                    val formatted = "${(minutesMapped / 60).toString().padStart(2, '0')}:${(minutesMapped % 60).toString().padStart(2, '0')}"
+                    timeTextView.text = formatted
                 } else {
                     Log.d("TIMER", "Pause")
                     cancel()
@@ -100,10 +112,38 @@ class ScoreboardActivity : AppCompatActivity() {
                         extraTimeTimer.start()
                         extraTimeTimerIsRunning = true
                     }
+                    additionalUpTextView.text = getString(R.string.paused)
                 }
             }
             override fun onFinish() {
-                additionalUpTextView.text = getString(R.string.half_time)
+                regularTimeTimerIsRunning = false
+                _millisUntilFinished = Long.MIN_VALUE
+                when (currentMatchTime) {
+                    MatchTime.firstHalf -> {
+                        currentMatchTime = MatchTime.secondHalf
+                    }
+                    MatchTime.secondHalf -> {
+                         if (configuration.extraTime && homePointValue == awayPointValue) {
+                             currentMatchTime = MatchTime.firstExtraHalf
+                             configuration.minutes = configuration.minutes/3
+                        } else {
+                             currentMatchTime = MatchTime.endGame
+                        }
+                    }
+                    MatchTime.firstExtraHalf -> {
+                        currentMatchTime = MatchTime.secondExtraHalf
+                        configuration.minutes = configuration.minutes/3
+                    }
+                    MatchTime.secondExtraHalf -> {
+                        currentMatchTime = if (homePointValue == awayPointValue) {
+                            MatchTime.penalties
+                        } else {
+                            MatchTime.endGame
+                        }
+                    }
+                    else -> {}
+                }
+                setAdditionalUpTextView()
             }
         }
         regularTimeTimer.start()
@@ -124,9 +164,43 @@ class ScoreboardActivity : AppCompatActivity() {
         }
     }
 
+    fun map(value: Long, in_min: Long, in_max: Long, out_min: Long, out_max: Long): Long {
+        return (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         regularTimeTimer.cancel()
         extraTimeTimer.cancel()
+    }
+
+    private fun setAdditionalUpTextView() {
+        when (currentMatchTime) {
+            MatchTime.firstHalf -> additionalUpTextView.text = getString(R.string.first_half)
+            MatchTime.secondHalf -> {
+                additionalUpTextView.text = if(regularTimeTimerIsRunning) {
+                    getString(R.string.second_half)
+                } else {
+                    getString(R.string.half_time)
+                }
+            }
+            MatchTime.firstExtraHalf -> additionalUpTextView.text = getString(R.string.first_extra_half)
+            MatchTime.secondExtraHalf -> {
+                additionalUpTextView.text = if(regularTimeTimerIsRunning) {
+                    getString(R.string.second_extra_half)
+                } else {
+                    getString(R.string.half_time)
+                }
+            }
+            MatchTime.penalties -> additionalUpTextView.text = getString(R.string.penalties)
+            MatchTime.endGame ->
+                if (homePointValue > awayPointValue) {
+                    additionalUpTextView.text = "${getString(R.string.end_game)}\n${getString(R.string.home_wins)}"
+                } else if (homePointValue < awayPointValue) {
+                    additionalUpTextView.text = "${getString(R.string.end_game)}\n${getString(R.string.away)}"
+                } else if (homePointValue == awayPointValue) {
+                    additionalUpTextView.text = "${getString(R.string.end_game)}\n${getString(R.string.tie)}"
+                }
+        }
     }
 }

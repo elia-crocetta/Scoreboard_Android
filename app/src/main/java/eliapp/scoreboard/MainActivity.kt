@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         when (position) {
             0 -> scoreboardConfig.minutes = 900000
             1 -> scoreboardConfig.minutes = 600000
-            2 -> scoreboardConfig.minutes = 300000
+            2 -> scoreboardConfig.minutes = 10000
         }
     }
 
