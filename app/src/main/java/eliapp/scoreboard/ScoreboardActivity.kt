@@ -4,6 +4,9 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
+import android.view.View
+import android.view.Window
+import android.view.WindowManager
 import android.widget.TextView
 
 enum class MatchTime {
@@ -29,15 +32,17 @@ class ScoreboardActivity : AppCompatActivity() {
 
     private lateinit var extraTimeTimer: CountDownTimer
     private var valueTimerExtra: Long = 0
-    private var actualExtraTimeValue: Long =
-        when (valueTimerExtra) {
-            in 1 .. 5 -> 5000
+    private fun actualExtraTimeValue(): Long {
+        return when (valueTimerExtra) {
+            in 0 .. 50 -> 0
             in 51 .. 110 -> 60000
             in 111 .. 170 -> 120000
             in 171 .. 230 -> 180000
             in 231 .. 290 -> 240000
             else -> 300000
         }
+    }
+
     private var extraTimeTimerIsRunning = false
     private var matchIsInExtraMinutes = false
     private var elapsedExtraMinutes = 0
@@ -47,6 +52,8 @@ class ScoreboardActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_scoreboard)
+        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
+        actionBar?.hide()
 
         val config = intent.getSerializableExtra("CONFIG") as? ScoreboardConfiguration ?: return
         configuration = config
@@ -58,7 +65,6 @@ class ScoreboardActivity : AppCompatActivity() {
         additionalUpTextView = findViewById(R.id.additionalUpTextView)
         additionalBottomTextView = findViewById(R.id.additionalBottomTextView)
         additionalBottomTextView.text = ""
-
     }
 
     private fun createHomePointTextView() {
@@ -93,6 +99,7 @@ class ScoreboardActivity : AppCompatActivity() {
         }
     }
 
+    var countDownToStart = 3
     private fun createTimeTextView() {
         timeTextView = findViewById(R.id.timeTextView)
         timeTextView.isClickable = true
@@ -101,16 +108,31 @@ class ScoreboardActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
             regularTimeTimerIsRunning = !regularTimeTimerIsRunning
-            setAdditionalUpTextView()
-            createRegularTimeCounter()
             additionalBottomTextView.text = null
+            if (!regularTimeTimerIsRunning) {
+                setAdditionalUpTextView()
+                createRegularTimeCounter()
+            } else {
+                object  : CountDownTimer(3000, 1000) {
+                    override fun onTick(millisUntilFinished: Long) {
+                        additionalUpTextView.text = countDownToStart.toString()
+                        countDownToStart--
+                    }
+
+                    override fun onFinish() {
+                        countDownToStart = 3
+                        setAdditionalUpTextView()
+                        createRegularTimeCounter()
+                    }
+                }.start()
+            }
         }
     }
 
     private fun createRegularTimeCounter() {
         val zeroLong: Long = 0
         val time = if (_millisUntilFinished == zeroLong) if (currentMatchTime == MatchTime.firstExtraHalf || currentMatchTime == MatchTime.secondExtraHalf ) configuration.minutes / 3 else {configuration.minutes} else { _millisUntilFinished }
-        val actualTime = if (matchIsInExtraMinutes) actualExtraTimeValue else time
+        val actualTime = if (matchIsInExtraMinutes) actualExtraTimeValue() else time
         regularTimeTimer = object : CountDownTimer(actualTime, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 _millisUntilFinished = millisUntilFinished
@@ -141,7 +163,7 @@ class ScoreboardActivity : AppCompatActivity() {
                 }
             }
             override fun onFinish() {
-                if (actualExtraTimeValue > 0 && !matchIsInExtraMinutes) {
+                if (actualExtraTimeValue() > 0 && !matchIsInExtraMinutes) {
                     matchIsInExtraMinutes = true
                     createRegularTimeCounter()
                 } else {
