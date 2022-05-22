@@ -1,9 +1,11 @@
 package eliapp.scoreboard
 
+import android.media.MediaPlayer
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
+import android.view.HapticFeedbackConstants
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
@@ -71,6 +73,7 @@ class ScoreboardActivity : AppCompatActivity() {
         homePointTextView = findViewById(R.id.homePointTextView)
         homePointTextView.isClickable = true
         homePointTextView.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY, HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING)
             if (regularTimeTimerIsRunning) {
                 regularTimeTimerIsRunning = false
                 homePointValue+=1
@@ -87,6 +90,7 @@ class ScoreboardActivity : AppCompatActivity() {
         awayPointTextView = findViewById(R.id.awayPointTextView)
         awayPointTextView.isClickable = true
         awayPointTextView.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY, HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING)
             if (regularTimeTimerIsRunning) {
                 regularTimeTimerIsRunning = false
                 awayPointValue+=1
@@ -107,9 +111,11 @@ class ScoreboardActivity : AppCompatActivity() {
             if (currentMatchTime == MatchTime.penalties || currentMatchTime == MatchTime.endGame) {
                 return@setOnClickListener
             }
+            it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY, HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING)
             regularTimeTimerIsRunning = !regularTimeTimerIsRunning
             additionalBottomTextView.text = null
             if (!regularTimeTimerIsRunning) {
+                MediaPlayer.create(applicationContext, R.raw.foul).start()
                 setAdditionalUpTextView()
                 createRegularTimeCounter()
             } else {
@@ -120,6 +126,7 @@ class ScoreboardActivity : AppCompatActivity() {
                     }
 
                     override fun onFinish() {
+                        MediaPlayer.create(applicationContext, R.raw.foul).start()
                         countDownToStart = 3
                         setAdditionalUpTextView()
                         createRegularTimeCounter()
@@ -234,6 +241,7 @@ class ScoreboardActivity : AppCompatActivity() {
                 additionalUpTextView.text = if(regularTimeTimerIsRunning) {
                     getString(R.string.second_half)
                 } else {
+                    MediaPlayer.create(applicationContext, R.raw.half).start()
                     getString(R.string.half_time)
                 }
             }
@@ -241,6 +249,7 @@ class ScoreboardActivity : AppCompatActivity() {
                 additionalUpTextView.text = if(regularTimeTimerIsRunning) {
                     getString(R.string.first_extra_half)
                 } else {
+                    MediaPlayer.create(applicationContext, R.raw.end).start()
                     getString(R.string.extra_time)
                 }
             }
@@ -248,11 +257,13 @@ class ScoreboardActivity : AppCompatActivity() {
                 additionalUpTextView.text = if(regularTimeTimerIsRunning) {
                     getString(R.string.second_extra_half)
                 } else {
+                    MediaPlayer.create(applicationContext, R.raw.half).start()
                     getString(R.string.half_time)
                 }
             }
             MatchTime.penalties -> additionalUpTextView.text = getString(R.string.penalties)
-            MatchTime.endGame ->
+            MatchTime.endGame -> {
+                MediaPlayer.create(applicationContext, R.raw.end).start()
                 if (homePointValue > awayPointValue) {
                     additionalUpTextView.text = getString(R.string.end_game, getString(R.string.home_wins))
                 } else if (homePointValue < awayPointValue) {
@@ -260,6 +271,7 @@ class ScoreboardActivity : AppCompatActivity() {
                 } else if (homePointValue == awayPointValue) {
                     additionalUpTextView.text = getString(R.string.end_game, getString(R.string.tie))
                 }
+            }
         }
     }
 }
