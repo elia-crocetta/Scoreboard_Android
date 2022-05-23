@@ -19,7 +19,9 @@ class ScoreboardActivity : AppCompatActivity() {
 
     private lateinit var configuration: ScoreboardConfiguration
     private lateinit var homePointTextView: TextView
+    private lateinit var homeNameTextView: TextView
     private lateinit var awayPointTextView: TextView
+    private lateinit var awayNameTextView: TextView
     private lateinit var additionalUpTextView: TextView
     private lateinit var additionalBottomTextView: TextView
     private lateinit var timeTextView: TextView
@@ -70,6 +72,8 @@ class ScoreboardActivity : AppCompatActivity() {
     }
 
     private fun createHomePointTextView() {
+        homeNameTextView = findViewById(R.id.homeNameTextView)
+        homeNameTextView.text = configuration.homeName
         homePointTextView = findViewById(R.id.homePointTextView)
         homePointTextView.isClickable = true
         homePointTextView.setOnClickListener {
@@ -87,6 +91,8 @@ class ScoreboardActivity : AppCompatActivity() {
     }
 
     private fun createAwayPointTextView() {
+        awayNameTextView = findViewById(R.id.awayNameTextView)
+        awayNameTextView.text = configuration.awayName
         awayPointTextView = findViewById(R.id.awayPointTextView)
         awayPointTextView.isClickable = true
         awayPointTextView.setOnClickListener {

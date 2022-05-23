@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Scoreboard</string>
     <string name="setting">Impostazioni</string>
-    <string name="extra_time_option">Supplementari in caso di parità</string>
+    <string name="extra_time_option">Supp. in caso di parità</string>
     <string name="duration_time">Durata tempo</string>
     <string name="duration_time_spinner">Scegli</string>
     <string-array name="Array_Minutes">
@@ -31,4 +31,6 @@
     <string name="zero">0</string>
     <string name="init_timer">00:00</string>
     <string name="paused">Paused</string>
+    <string name="home_selection">Casa</string>
+    <string name="away_selection">Trasferta</string>
 </resources>

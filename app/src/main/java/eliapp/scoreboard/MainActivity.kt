@@ -3,28 +3,30 @@ package eliapp.scoreboard
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Parcel
-import android.os.Parcelable
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.widget.*
+import androidx.core.widget.addTextChangedListener
 import com.google.android.material.switchmaterial.SwitchMaterial
 import java.io.Serializable
 
-data class ScoreboardConfiguration(var extraTime: Boolean, var minutes: Long) : Serializable {}
+data class ScoreboardConfiguration(var extraTime: Boolean, var minutes: Long, var homeName: String, var awayName: String) : Serializable
 
 class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
-    private var scoreboardConfig: ScoreboardConfiguration = ScoreboardConfiguration(false, 900)
+    private var scoreboardConfig: ScoreboardConfiguration = ScoreboardConfiguration(false, 900, "HOME", "AWAY")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         createSpinner()
         createSwitch()
         createProceedButton()
+        createHomeTextView()
+        createAwayTextView()
     }
 
     private lateinit var spinner: Spinner
     private fun createSpinner() {
-        spinner = findViewById<Spinner>(R.id.select_minutes_spinner)
+        spinner = findViewById(R.id.select_minutes_spinner)
         ArrayAdapter.createFromResource(
             this,
             R.array.Array_Minutes,
@@ -51,7 +53,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
     private lateinit var extraTimeSwitch: SwitchMaterial
     private fun createSwitch() {
-        extraTimeSwitch = findViewById<SwitchMaterial>(R.id.extratime_switch)
+        extraTimeSwitch = findViewById(R.id.extratime_switch)
         extraTimeSwitch.setOnCheckedChangeListener { _, isChecked ->
             scoreboardConfig.extraTime = isChecked
         }
@@ -59,12 +61,36 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
     private lateinit var proceedButton: Button
     private fun createProceedButton() {
-        proceedButton = findViewById<Button>(R.id.proceed_button)
+        proceedButton = findViewById(R.id.proceed_button)
         proceedButton.setOnClickListener {
             val intent = Intent(this, ScoreboardActivity::class.java).apply {
                 putExtra("CONFIG", scoreboardConfig)
             }
             startActivity(intent)
+        }
+    }
+
+    private lateinit var homeTextView: EditText
+    private fun createHomeTextView() {
+        homeTextView = findViewById(R.id.homePlainTextView)
+        homeTextView.setOnEditorActionListener { v, actionId, _ ->
+            if(actionId == EditorInfo.IME_ACTION_DONE) {
+                val homeName = v.text.toString().uppercase()
+                scoreboardConfig.homeName = homeName.ifBlank { "HOME" }
+            }
+            return@setOnEditorActionListener false
+        }
+    }
+
+    private lateinit var awayTextView: EditText
+    private fun createAwayTextView() {
+        awayTextView = findViewById(R.id.awayPlainTextView)
+        awayTextView.setOnEditorActionListener { v, actionId, _ ->
+            if(actionId == EditorInfo.IME_ACTION_DONE) {
+                val awayName = v.text.toString().uppercase()
+                scoreboardConfig.awayName = awayName.ifBlank { "AWAY" }
+            }
+            return@setOnEditorActionListener false
         }
     }
 }

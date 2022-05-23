@@ -11,11 +11,11 @@
     tools:context=".ScoreboardActivity">
 
     <TextView
-        android:id="@+id/textView4"
+        android:id="@+id/homeNameTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="56dp"
+        android:layout_marginTop="32dp"
         android:text="@string/home"
         android:textColor="@color/white"
         android:textSize="48sp"
@@ -33,9 +33,9 @@
         android:textColor="@color/white"
         android:textSize="34sp"
         android:textStyle="normal"
-        app:layout_constraintEnd_toStartOf="@+id/textView5"
-        app:layout_constraintStart_toEndOf="@+id/textView4"
-        app:layout_constraintTop_toTopOf="@+id/textView4" />
+        app:layout_constraintEnd_toStartOf="@+id/awayNameTextView"
+        app:layout_constraintStart_toEndOf="@+id/homeNameTextView"
+        app:layout_constraintTop_toTopOf="@+id/homeNameTextView" />
 
     <TextView
         android:id="@+id/additionalBottomTextView"
@@ -51,10 +51,10 @@
         app:layout_constraintTop_toBottomOf="@+id/timeTextView" />
 
     <TextView
-        android:id="@+id/textView5"
+        android:id="@+id/awayNameTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="56dp"
+        android:layout_marginTop="32dp"
         android:layout_marginEnd="32dp"
         android:text="@string/away"
         android:textColor="@color/white"
@@ -72,8 +72,8 @@
         android:textSize="120sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/textView4"
-        app:layout_constraintStart_toStartOf="@+id/textView4"
+        app:layout_constraintEnd_toEndOf="@+id/homeNameTextView"
+        app:layout_constraintStart_toStartOf="@+id/homeNameTextView"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
@@ -98,7 +98,7 @@
         android:textSize="120sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/textView5"
-        app:layout_constraintStart_toStartOf="@+id/textView5"
+        app:layout_constraintEnd_toEndOf="@+id/awayNameTextView"
+        app:layout_constraintStart_toStartOf="@+id/awayNameTextView"
         app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
