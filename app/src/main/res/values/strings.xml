@@ -16,8 +16,7 @@
     <string name="kick_off">Kick Off</string>
     <string name="first_half">1st Half</string>
     <string name="second_half">2nd Half</string>
-    <string name="goal_home">GOOOL HOME!</string>
-    <string name="goal_away">GOOOL AWAY!</string>
+    <string name="goal_team">GOOOL %1$s!</string>
     <string name="over_time">Over Time: +%1$s</string>
     <string name="half_time">Half time</string>
     <string name="end_game">End game\n%1$s</string>

@@ -82,7 +82,7 @@ class ScoreboardActivity : AppCompatActivity() {
                 regularTimeTimerIsRunning = false
                 homePointValue+=1
                 homePointTextView.text = "$homePointValue"
-                additionalBottomTextView.text = getString(R.string.goal_home)
+                additionalBottomTextView.text = getString(R.string.goal_team, configuration.homeName)
             } else if (currentMatchTime == MatchTime.penalties) {
                 homePointValue+=1
                 homePointTextView.text = "$homePointValue"
@@ -101,7 +101,7 @@ class ScoreboardActivity : AppCompatActivity() {
                 regularTimeTimerIsRunning = false
                 awayPointValue+=1
                 awayPointTextView.text = "$awayPointValue"
-                additionalBottomTextView.text = getString(R.string.goal_away)
+                additionalBottomTextView.text = getString(R.string.goal_team, configuration.awayName)
             } else if (currentMatchTime == MatchTime.penalties) {
                 awayPointValue+=1
                 awayPointTextView.text = "$awayPointValue"
