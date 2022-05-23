@@ -38,17 +38,13 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         spinner.onItemSelectedListener = this
     }
 
+    val arraySelectionMinutes = arrayOf<Long>(900000, 600000, 300000, 15000)
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-        when (position) {
-            0 -> scoreboardConfig.minutes = 900000
-            1 -> scoreboardConfig.minutes = 600000
-            2 -> scoreboardConfig.minutes = 300000
-            3 -> scoreboardConfig.minutes = 15000
-        }
+        scoreboardConfig.minutes = arraySelectionMinutes[position]
     }
 
     override fun onNothingSelected(parent: AdapterView<*>?) {
-        scoreboardConfig.minutes = 900000
+        scoreboardConfig.minutes = arraySelectionMinutes[0]
     }
 
     private lateinit var extraTimeSwitch: SwitchMaterial
