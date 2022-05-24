@@ -160,7 +160,7 @@ class ScoreboardActivity : AppCompatActivity() {
                     if (matchIsInExtraMinutes) {
                         elapsedExtraMinutes++
                         val formatted = elapsedExtraMinutes.formatValueForScoreboard()
-                        additionalUpTextView.text = getString(R.string.over_time, formatted)
+                        additionalUpTextView.text = getString(R.string.over_minutes, formatted)
                     } else {
                         valueTimer++
                         val formatted = valueTimer.formatValueForScoreboard()
@@ -183,6 +183,16 @@ class ScoreboardActivity : AppCompatActivity() {
             }
             override fun onFinish() {
                 if (actualExtraTimeValue() > 0 && !matchIsInExtraMinutes) {
+                    when (currentMatchTime) {
+                        MatchTime.FirstHalf -> valueTimer = 2700
+                        MatchTime.SecondHalf -> valueTimer = 5400
+                        MatchTime.FirstExtraHalf -> valueTimer = 6300
+                        MatchTime.SecondExtraHalf -> valueTimer = 7200
+                        else -> {}
+                    }
+
+                    additionalBottomTextView.text = getString(R.string.announce_over_time, (actualExtraTimeValue() / 60000).toString())
+                    timeTextView.text = valueTimer.formatValueForScoreboard()
                     matchIsInExtraMinutes = true
                     createRegularTimeCounter()
                 } else {
@@ -191,16 +201,15 @@ class ScoreboardActivity : AppCompatActivity() {
                     _millisUntilFinished = 0
                     valueTimerExtra = 0
                     elapsedExtraMinutes = 0
+                    additionalBottomTextView.text = ""
 
                     when (currentMatchTime) {
                         MatchTime.FirstHalf -> {
                             valueTimer = 2700
-                            timeTextView.text = getString(R.string.half_time_minutes)
                             currentMatchTime = MatchTime.SecondHalf
                         }
                         MatchTime.SecondHalf -> {
                             valueTimer = 5400
-                            timeTextView.text = getString(R.string.full_time_minutes)
                             currentMatchTime = if (configuration.extraTime && homePointValue == awayPointValue) {
                                 MatchTime.FirstExtraHalf
                             } else {
@@ -209,12 +218,10 @@ class ScoreboardActivity : AppCompatActivity() {
                         }
                         MatchTime.FirstExtraHalf -> {
                             valueTimer = 6300
-                            timeTextView.text = getString(R.string.extra_half_time_minutes)
                             currentMatchTime = MatchTime.SecondExtraHalf
                         }
                         MatchTime.SecondExtraHalf -> {
                             valueTimer = 7200
-                            timeTextView.text = getString(R.string.extra_full_time_minutes)
                             currentMatchTime = if (homePointValue == awayPointValue) {
                                 MatchTime.Penalties
                             } else {
@@ -223,6 +230,7 @@ class ScoreboardActivity : AppCompatActivity() {
                         }
                         else -> {}
                     }
+                    timeTextView.text = valueTimer.formatValueForScoreboard()
                     setAdditionalUpTextView()
                 }
             }
