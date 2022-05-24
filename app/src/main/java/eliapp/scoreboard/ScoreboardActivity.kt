@@ -10,7 +10,10 @@ import android.view.View
 import android.widget.TextView
 
 enum class MatchTime {
-    FirstHalf, SecondHalf, FirstExtraHalf, SecondExtraHalf, Penalties, EndGame
+    FirstHalf, SecondHalf, FirstExtraHalf, SecondExtraHalf, Penalties, EndGame;
+    fun isInExtraTime() : Boolean {
+        return this == FirstExtraHalf || this == SecondExtraHalf
+    }
 }
 
 
@@ -108,7 +111,7 @@ class ScoreboardActivity : AppCompatActivity() {
         }
     }
 
-    var countDownToStart = 3
+    private var countDownToStart = 3
     private fun createTimeTextView() {
         timeTextView = findViewById(R.id.timeTextView)
         timeTextView.isClickable = true
@@ -121,7 +124,6 @@ class ScoreboardActivity : AppCompatActivity() {
             additionalBottomTextView.text = null
             if (!regularTimeTimerIsRunning) {
                 MediaPlayer.create(applicationContext, R.raw.foul).start()
-                setAdditionalUpTextView()
                 createRegularTimeCounter()
             } else {
                 object  : CountDownTimer(3000, 1000) {
@@ -143,7 +145,8 @@ class ScoreboardActivity : AppCompatActivity() {
 
     private fun createRegularTimeCounter() {
         val zeroLong: Long = 0
-        val time = if (_millisUntilFinished == zeroLong) if (currentMatchTime == MatchTime.FirstExtraHalf || currentMatchTime == MatchTime.SecondExtraHalf ) 2700000 / 3 else {2700000} else { _millisUntilFinished }
+        val durationHalf: Long = if (currentMatchTime.isInExtraTime()) 2700000 / 3 else 2700000
+        val time = if (_millisUntilFinished == zeroLong) durationHalf else { _millisUntilFinished }
         val actualTime = if (matchIsInExtraMinutes) actualExtraTimeValue() else time
         val actualInterval: Long = if (matchIsInExtraMinutes) 1000 else { 1000/(2700000 / configuration.minutes) }
 
@@ -156,7 +159,7 @@ class ScoreboardActivity : AppCompatActivity() {
                         extraTimeTimerIsRunning = false
                     }
 
-                    Log.d("TIMER", "${2700000-millisUntilFinished}")
+                    Log.d("TIMER", "${durationHalf-millisUntilFinished}")
                     if (matchIsInExtraMinutes) {
                         elapsedExtraMinutes++
                         val formatted = elapsedExtraMinutes.formatValueForScoreboard()
@@ -165,8 +168,9 @@ class ScoreboardActivity : AppCompatActivity() {
                         valueTimer++
                         val formatted = valueTimer.formatValueForScoreboard()
                         timeTextView.text = formatted
-                        val timeElapsed = 2700000-millisUntilFinished
-                        if (timeElapsed >= configuration.minutes) {
+                        val timeElapsed = durationHalf-millisUntilFinished
+                        val realTimeMax = if (currentMatchTime.isInExtraTime()) configuration.minutes/3 else configuration.minutes
+                        if (timeElapsed >= realTimeMax) {
                             cancel()
                             onFinish()
                         }
@@ -263,30 +267,33 @@ class ScoreboardActivity : AppCompatActivity() {
         when (currentMatchTime) {
             MatchTime.FirstHalf -> additionalUpTextView.text = getString(R.string.first_half)
             MatchTime.SecondHalf -> {
-                additionalUpTextView.text = if(regularTimeTimerIsRunning) {
-                    getString(R.string.second_half)
+                if(regularTimeTimerIsRunning) {
+                    additionalUpTextView.text = getString(R.string.second_half)
                 } else {
                     MediaPlayer.create(applicationContext, R.raw.half).start()
-                    getString(R.string.half_time)
+                    additionalUpTextView.text = getString(R.string.half_time)
                 }
             }
             MatchTime.FirstExtraHalf -> {
-                additionalUpTextView.text = if(regularTimeTimerIsRunning) {
-                    getString(R.string.first_extra_half)
+                if(regularTimeTimerIsRunning) {
+                    additionalUpTextView.text = getString(R.string.first_extra_half)
                 } else {
                     MediaPlayer.create(applicationContext, R.raw.end).start()
-                    getString(R.string.extra_time)
+                    additionalUpTextView.text = getString(R.string.extra_time)
                 }
             }
             MatchTime.SecondExtraHalf -> {
-                additionalUpTextView.text = if(regularTimeTimerIsRunning) {
-                    getString(R.string.second_extra_half)
+                if(regularTimeTimerIsRunning) {
+                    additionalUpTextView.text = getString(R.string.second_extra_half)
                 } else {
                     MediaPlayer.create(applicationContext, R.raw.half).start()
-                    getString(R.string.half_time)
+                    additionalUpTextView.text = getString(R.string.half_time)
                 }
             }
-            MatchTime.Penalties -> additionalUpTextView.text = getString(R.string.penalties)
+            MatchTime.Penalties -> {
+                MediaPlayer.create(applicationContext, R.raw.end).start()
+                additionalUpTextView.text = getString(R.string.penalties)
+            }
             MatchTime.EndGame -> {
                 MediaPlayer.create(applicationContext, R.raw.end).start()
                 if (homePointValue > awayPointValue) {

@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         spinner.onItemSelectedListener = this
     }
 
-    val arraySelectionMinutes = arrayOf<Long>(900000, 600000, 300000, 15000)
+    private val arraySelectionMinutes = arrayOf<Long>(900000, 600000, 300000)
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         scoreboardConfig.minutes = arraySelectionMinutes[position]
     }
