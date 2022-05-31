@@ -27,6 +27,7 @@ class ScoreboardActivity : AppCompatActivity() {
     private lateinit var additionalUpTextView: TextView
     private lateinit var additionalBottomTextView: TextView
     private lateinit var timeTextView: TextView
+    private lateinit var soundManager: SoundManager
 
     private var homePointValue: Int = 0
     private var awayPointValue: Int = 0
@@ -64,6 +65,8 @@ class ScoreboardActivity : AppCompatActivity() {
         val config = intent.getSerializableExtra("CONFIG") as? ScoreboardConfiguration ?: return
         configuration = config
 
+        soundManager = SoundManager(applicationContext)
+
         createHomePointTextView()
         createAwayPointTextView()
         createTimeTextView()
@@ -71,6 +74,8 @@ class ScoreboardActivity : AppCompatActivity() {
         additionalUpTextView = findViewById(R.id.additionalUpTextView)
         additionalBottomTextView = findViewById(R.id.additionalBottomTextView)
         additionalBottomTextView.text = ""
+
+        soundManager.crowdGoalHome()
     }
 
     private fun createHomePointTextView() {
@@ -261,6 +266,7 @@ class ScoreboardActivity : AppCompatActivity() {
         super.onDestroy()
         if (regularTimeTimerIsRunning) {regularTimeTimer.cancel()}
         if (extraTimeTimerIsRunning) {extraTimeTimer.cancel()}
+        soundManager.stopAll()
     }
 
     private fun setAdditionalUpTextView() {
