@@ -39,12 +39,19 @@ data class SoundManager(val context: Context) {
         refereeEndTime.start()
     }
     fun crowdStartupScoreboard() {
-        refereeHalfTime = MediaPlayer.create(context, R.raw.crowd_startup_scoreboard)
-        refereeHalfTime.start()
+        crowdStartupScoreboard = MediaPlayer.create(context, R.raw.crowd_startup_scoreboard)
+        crowdStartupScoreboard.start()
     }
     fun crowdHalfTime() {
-        refereeHalfTime = MediaPlayer.create(context, R.raw.crowd_half_time)
-        refereeHalfTime.start()
+        crowdBackground.stop()
+        crowdBackground2.stop()
+        crowdBackground3.stop()
+        crowdBackground4.stop()
+        crowdBackground5.stop()
+        crowdStartupScoreboard.stop()
+        crowdStarted = false
+        crowdHalfTime = MediaPlayer.create(context, R.raw.crowd_half_time)
+        crowdHalfTime.start()
     }
     fun crowdGoalHome() {
         media = MediaPlayer.create(context, R.raw.crowd_goal_home)
@@ -72,8 +79,8 @@ data class SoundManager(val context: Context) {
         media.stop()
         media2.stop()
         crowdAwayGoal.stop()
-        crowdStartupScoreboard.stop()
         if (crowdStarted) {
+            crowdStartupScoreboard.stop()
             return
         }
 
@@ -99,6 +106,7 @@ data class SoundManager(val context: Context) {
             crowdBackground2.start()
         }
         crowdBackground.start()
+        crowdStartupScoreboard.stop()
     }
 
     fun stopAll() {
