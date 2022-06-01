@@ -24,6 +24,7 @@ data class SoundManager(val context: Context) {
     private var media = MediaPlayer.create(context, R.raw.crowd_goal_home)
     private var media2 = MediaPlayer.create(context, R.raw.crowd_goal_home_2)
     private var crowdAwayGoal: MediaPlayer = MediaPlayer.create(context, R.raw.crowd_goal_away)
+    private var crowdPenaltyMissed: MediaPlayer = MediaPlayer.create(context, R.raw.crowd_penalties_miss)
 
     fun refereeHalfTime() {
         refereeHalfTime = MediaPlayer.create(context, R.raw.half)
@@ -45,7 +46,6 @@ data class SoundManager(val context: Context) {
         refereeHalfTime = MediaPlayer.create(context, R.raw.crowd_half_time)
         refereeHalfTime.start()
     }
-
     fun crowdGoalHome() {
         media = MediaPlayer.create(context, R.raw.crowd_goal_home)
         media2 = MediaPlayer.create(context, R.raw.crowd_goal_home_2)
@@ -54,10 +54,17 @@ data class SoundManager(val context: Context) {
         }
         media.start()
     }
-
     fun crowdGoalAway() {
         crowdAwayGoal = MediaPlayer.create(context, R.raw.crowd_goal_away)
         crowdAwayGoal.start()
+    }
+    fun crowdPenaltyScored() {
+        media = MediaPlayer.create(context, R.raw.crowd_goal_home)
+        media.start()
+    }
+    fun crowdPenaltyMissed() {
+        crowdPenaltyMissed = MediaPlayer.create(context, R.raw.crowd_penalties_miss)
+        crowdPenaltyMissed.start()
     }
 
     private var crowdStarted = false

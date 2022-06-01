@@ -93,6 +93,7 @@ class ScoreboardActivity : AppCompatActivity() {
             } else if (currentMatchTime == MatchTime.Penalties) {
                 homePointValue+=1
                 homePointTextView.text = "$homePointValue"
+                soundManager.crowdPenaltyScored()
             }
         }
     }
@@ -113,6 +114,7 @@ class ScoreboardActivity : AppCompatActivity() {
             } else if (currentMatchTime == MatchTime.Penalties) {
                 awayPointValue+=1
                 awayPointTextView.text = "$awayPointValue"
+                soundManager.crowdPenaltyScored()
             }
         }
     }
