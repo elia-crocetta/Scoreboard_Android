@@ -1,6 +1,5 @@
 package eliapp.scoreboard
 
-import android.media.MediaPlayer
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -75,7 +74,7 @@ class ScoreboardActivity : AppCompatActivity() {
         additionalBottomTextView = findViewById(R.id.additionalBottomTextView)
         additionalBottomTextView.text = ""
 
-        soundManager.crowdGoalHome()
+        soundManager.crowdStartupScoreboard()
     }
 
     private fun createHomePointTextView() {
@@ -86,6 +85,7 @@ class ScoreboardActivity : AppCompatActivity() {
         homePointTextView.setOnClickListener {
             it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY, HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING)
             if (regularTimeTimerIsRunning) {
+                soundManager.crowdGoalHome()
                 regularTimeTimerIsRunning = false
                 homePointValue+=1
                 homePointTextView.text = "$homePointValue"
@@ -105,6 +105,7 @@ class ScoreboardActivity : AppCompatActivity() {
         awayPointTextView.setOnClickListener {
             it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY, HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING)
             if (regularTimeTimerIsRunning) {
+                soundManager.crowdGoalAway()
                 regularTimeTimerIsRunning = false
                 awayPointValue+=1
                 awayPointTextView.text = "$awayPointValue"
@@ -121,6 +122,7 @@ class ScoreboardActivity : AppCompatActivity() {
         timeTextView = findViewById(R.id.timeTextView)
         timeTextView.isClickable = true
         timeTextView.setOnClickListener {
+            soundManager.crowdBackground()
             if (currentMatchTime == MatchTime.Penalties || currentMatchTime == MatchTime.EndGame) {
                 return@setOnClickListener
             }
@@ -128,7 +130,8 @@ class ScoreboardActivity : AppCompatActivity() {
             regularTimeTimerIsRunning = !regularTimeTimerIsRunning
             additionalBottomTextView.text = null
             if (!regularTimeTimerIsRunning) {
-                MediaPlayer.create(applicationContext, R.raw.foul).start()
+                soundManager.refereeWhistle()
+                soundManager.crowdBackground()
                 createRegularTimeCounter()
             } else {
                 object  : CountDownTimer(3000, 1000) {
@@ -138,7 +141,7 @@ class ScoreboardActivity : AppCompatActivity() {
                     }
 
                     override fun onFinish() {
-                        MediaPlayer.create(applicationContext, R.raw.foul).start()
+                        soundManager.refereeWhistle()
                         countDownToStart = 3
                         setAdditionalUpTextView()
                         createRegularTimeCounter()
@@ -163,8 +166,6 @@ class ScoreboardActivity : AppCompatActivity() {
                         extraTimeTimer.cancel()
                         extraTimeTimerIsRunning = false
                     }
-
-                    Log.d("TIMER", "${durationHalf-millisUntilFinished}")
                     if (matchIsInExtraMinutes) {
                         elapsedExtraMinutes++
                         val formatted = elapsedExtraMinutes.formatValueForScoreboard()
@@ -276,7 +277,8 @@ class ScoreboardActivity : AppCompatActivity() {
                 if(regularTimeTimerIsRunning) {
                     additionalUpTextView.text = getString(R.string.second_half)
                 } else {
-                    MediaPlayer.create(applicationContext, R.raw.half).start()
+                    soundManager.crowdHalfTime()
+                    soundManager.refereeHalfTime()
                     additionalUpTextView.text = getString(R.string.half_time)
                 }
             }
@@ -284,7 +286,8 @@ class ScoreboardActivity : AppCompatActivity() {
                 if(regularTimeTimerIsRunning) {
                     additionalUpTextView.text = getString(R.string.first_extra_half)
                 } else {
-                    MediaPlayer.create(applicationContext, R.raw.end).start()
+                    soundManager.crowdHalfTime()
+                    soundManager.refereeEndGame()
                     additionalUpTextView.text = getString(R.string.extra_time)
                 }
             }
@@ -292,16 +295,19 @@ class ScoreboardActivity : AppCompatActivity() {
                 if(regularTimeTimerIsRunning) {
                     additionalUpTextView.text = getString(R.string.second_extra_half)
                 } else {
-                    MediaPlayer.create(applicationContext, R.raw.half).start()
+                    soundManager.crowdHalfTime()
+                    soundManager.refereeHalfTime()
                     additionalUpTextView.text = getString(R.string.half_time)
                 }
             }
             MatchTime.Penalties -> {
-                MediaPlayer.create(applicationContext, R.raw.end).start()
+                soundManager.crowdHalfTime()
+                soundManager.refereeEndGame()
                 additionalUpTextView.text = getString(R.string.penalties)
             }
             MatchTime.EndGame -> {
-                MediaPlayer.create(applicationContext, R.raw.end).start()
+                soundManager.crowdHalfTime()
+                soundManager.refereeEndGame()
                 if (homePointValue > awayPointValue) {
                     additionalUpTextView.text = getString(R.string.end_game, getString(R.string.home_wins))
                 } else if (homePointValue < awayPointValue) {

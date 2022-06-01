@@ -1,33 +1,105 @@
 package eliapp.scoreboard
 
 import android.content.Context
+import android.media.AudioManager
 import android.media.MediaPlayer
+import android.media.SoundPool
+import android.util.Log
+import java.util.*
 
 data class SoundManager(val context: Context) {
-    val refreeHalfTime = MediaPlayer.create(context, R.raw.half)
-    val refreeWhistle = MediaPlayer.create(context, R.raw.foul)
-    val refreeEndTime = MediaPlayer.create(context, R.raw.end)
+    private var refereeHalfTime: MediaPlayer = MediaPlayer.create(context, R.raw.half)
+    private var refereeWhistle: MediaPlayer = MediaPlayer.create(context, R.raw.foul)
+    private var refereeEndTime: MediaPlayer = MediaPlayer.create(context, R.raw.end)
 
-    val crowdStartupScoreboard = MediaPlayer.create(context, R.raw.crowd_startup_scoreboard)
-    val crowdBackground = MediaPlayer.create(context, R.raw.crowd_background)
-    val crowdBackground2 = MediaPlayer.create(context, R.raw.crowd_background_2)
-    val crowdBackground3 = MediaPlayer.create(context, R.raw.crowd_background_3)
-    val crowdBackground4 = MediaPlayer.create(context, R.raw.crowd_background_4)
-    val crowdBackground5 = MediaPlayer.create(context, R.raw.crowd_background_5)
+    private var crowdStartupScoreboard: MediaPlayer = MediaPlayer.create(context, R.raw.crowd_startup_scoreboard)
+    private var crowdHalfTime: MediaPlayer = MediaPlayer.create(context, R.raw.crowd_half_time)
 
-    private val media = MediaPlayer.create(context, R.raw.crowd_goal_home)
-    private val media2 = MediaPlayer.create(context, R.raw.crowd_goal_home_2)
+    private var crowdBackground: MediaPlayer = MediaPlayer.create(context, R.raw.crowd_background)
+    private var crowdBackground2: MediaPlayer = MediaPlayer.create(context, R.raw.crowd_background_2)
+    private var crowdBackground3: MediaPlayer = MediaPlayer.create(context, R.raw.crowd_background_3)
+    private var crowdBackground4: MediaPlayer = MediaPlayer.create(context, R.raw.crowd_background_4)
+    private var crowdBackground5: MediaPlayer = MediaPlayer.create(context, R.raw.crowd_background_5)
+
+    private var media = MediaPlayer.create(context, R.raw.crowd_goal_home)
+    private var media2 = MediaPlayer.create(context, R.raw.crowd_goal_home_2)
+    private var crowdAwayGoal: MediaPlayer = MediaPlayer.create(context, R.raw.crowd_goal_away)
+
+    fun refereeHalfTime() {
+        refereeHalfTime = MediaPlayer.create(context, R.raw.half)
+        refereeHalfTime.start()
+    }
+    fun refereeWhistle() {
+        refereeWhistle = MediaPlayer.create(context, R.raw.foul)
+        refereeWhistle.start()
+    }
+    fun refereeEndGame() {
+        refereeEndTime = MediaPlayer.create(context, R.raw.end)
+        refereeEndTime.start()
+    }
+    fun crowdStartupScoreboard() {
+        refereeHalfTime = MediaPlayer.create(context, R.raw.crowd_startup_scoreboard)
+        refereeHalfTime.start()
+    }
+    fun crowdHalfTime() {
+        refereeHalfTime = MediaPlayer.create(context, R.raw.crowd_half_time)
+        refereeHalfTime.start()
+    }
+
     fun crowdGoalHome() {
-        media.setOnCompletionListener(MediaPlayer.OnCompletionListener {
+        media = MediaPlayer.create(context, R.raw.crowd_goal_home)
+        media2 = MediaPlayer.create(context, R.raw.crowd_goal_home_2)
+        media.setOnCompletionListener{
             media2.start()
-        })
+        }
         media.start()
     }
 
+    fun crowdGoalAway() {
+        crowdAwayGoal = MediaPlayer.create(context, R.raw.crowd_goal_away)
+        crowdAwayGoal.start()
+    }
+
+    private var crowdStarted = false
+    fun crowdBackground() {
+        media.stop()
+        media2.stop()
+        crowdAwayGoal.stop()
+        crowdStartupScoreboard.stop()
+        if (crowdStarted) {
+            return
+        }
+
+        crowdBackground = MediaPlayer.create(context, R.raw.crowd_background)
+        crowdBackground2 = MediaPlayer.create(context, R.raw.crowd_background_2)
+        crowdBackground3 = MediaPlayer.create(context, R.raw.crowd_background_3)
+        crowdBackground5 = MediaPlayer.create(context, R.raw.crowd_background_4)
+        crowdBackground5 = MediaPlayer.create(context, R.raw.crowd_background_5)
+
+        crowdStarted = true
+        crowdBackground.setOnCompletionListener {
+            crowdBackground2.setOnCompletionListener {
+                crowdBackground3.setOnCompletionListener {
+                    crowdBackground4.setOnCompletionListener {
+                        crowdBackground5.setOnCompletionListener {
+                            this.crowdBackground()
+                        }
+                    }
+                    crowdBackground4.start()
+                }
+                crowdBackground3.start()
+            }
+            crowdBackground2.start()
+        }
+        crowdBackground.start()
+    }
+
     fun stopAll() {
-        refreeHalfTime.stop()
-        refreeWhistle.stop()
-        refreeEndTime.stop()
+        crowdStarted = false
+        refereeHalfTime.stop()
+        refereeWhistle.stop()
+        refereeEndTime.stop()
+        crowdHalfTime.stop()
         crowdStartupScoreboard.stop()
         crowdBackground.stop()
         crowdBackground2.stop()
