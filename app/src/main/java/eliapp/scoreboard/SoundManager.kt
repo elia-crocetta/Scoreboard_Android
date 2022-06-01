@@ -1,11 +1,9 @@
 package eliapp.scoreboard
 
 import android.content.Context
-import android.media.AudioManager
 import android.media.MediaPlayer
-import android.media.SoundPool
 import android.util.Log
-import java.util.*
+import java.lang.Exception
 
 data class SoundManager(val context: Context) {
     private var refereeHalfTime: MediaPlayer = MediaPlayer.create(context, R.raw.half)
@@ -40,17 +38,23 @@ data class SoundManager(val context: Context) {
     }
     fun crowdStartupScoreboard() {
         crowdStartupScoreboard = MediaPlayer.create(context, R.raw.crowd_startup_scoreboard)
+        crowdStartupScoreboard.setOnCompletionListener {
+            crowdStartupScoreboard()
+        }
         crowdStartupScoreboard.start()
     }
     fun crowdHalfTime() {
-        crowdBackground.stop()
-        crowdBackground2.stop()
-        crowdBackground3.stop()
-        crowdBackground4.stop()
-        crowdBackground5.stop()
-        crowdStartupScoreboard.stop()
+        crowdBackground.fullStop()
+        crowdBackground2.fullStop()
+        crowdBackground3.fullStop()
+        crowdBackground4.fullStop()
+        crowdBackground5.fullStop()
+        crowdStartupScoreboard.fullStop()
         crowdStarted = false
         crowdHalfTime = MediaPlayer.create(context, R.raw.crowd_half_time)
+        crowdHalfTime.setOnCompletionListener {
+            crowdHalfTime()
+        }
         crowdHalfTime.start()
     }
     fun crowdGoalHome() {
@@ -76,11 +80,12 @@ data class SoundManager(val context: Context) {
 
     private var crowdStarted = false
     fun crowdBackground() {
-        media.stop()
-        media2.stop()
-        crowdAwayGoal.stop()
+        media.fullStop()
+        media2.fullStop()
+        crowdAwayGoal.fullStop()
+
         if (crowdStarted) {
-            crowdStartupScoreboard.stop()
+            crowdStartupScoreboard.fullStop()
             return
         }
 
@@ -106,22 +111,33 @@ data class SoundManager(val context: Context) {
             crowdBackground2.start()
         }
         crowdBackground.start()
-        crowdStartupScoreboard.stop()
+        crowdStartupScoreboard.fullStop()
     }
 
     fun stopAll() {
         crowdStarted = false
-        refereeHalfTime.stop()
-        refereeWhistle.stop()
-        refereeEndTime.stop()
-        crowdHalfTime.stop()
-        crowdStartupScoreboard.stop()
-        crowdBackground.stop()
-        crowdBackground2.stop()
-        crowdBackground3.stop()
-        crowdBackground4.stop()
-        crowdBackground5.stop()
-        media.stop()
-        media2.stop()
+        refereeHalfTime.fullStop()
+        refereeWhistle.fullStop()
+        refereeEndTime.fullStop()
+        crowdHalfTime.fullStop()
+        crowdStartupScoreboard.fullStop()
+        crowdBackground.fullStop()
+        crowdBackground2.fullStop()
+        crowdBackground3.fullStop()
+        crowdBackground4.fullStop()
+        crowdBackground5.fullStop()
+        crowdStartupScoreboard.fullStop()
+        media.fullStop()
+        media2.fullStop()
+    }
+}
+
+fun MediaPlayer.fullStop() {
+    try {
+        this.stop()
+        this.reset()
+        this.release()
+    } catch (e: Exception) {
+        Log.d("ERRORE FULL STOP", e.toString())
     }
 }
