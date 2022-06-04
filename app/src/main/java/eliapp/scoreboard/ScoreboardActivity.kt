@@ -64,7 +64,7 @@ class ScoreboardActivity : AppCompatActivity() {
         val config = intent.getSerializableExtra("CONFIG") as? ScoreboardConfiguration ?: return
         configuration = config
 
-        soundManager = SoundManager(applicationContext)
+        soundManager = SoundManager(applicationContext, configuration.crowd)
 
         createHomePointTextView()
         createAwayPointTextView()

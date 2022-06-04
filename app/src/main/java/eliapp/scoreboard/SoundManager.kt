@@ -5,7 +5,7 @@ import android.media.MediaPlayer
 import android.util.Log
 import java.lang.Exception
 
-data class SoundManager(val context: Context) {
+data class SoundManager(val context: Context, val crowdEnabled: Boolean) {
     private var refereeHalfTime: MediaPlayer = MediaPlayer.create(context, R.raw.half)
     private var refereeWhistle: MediaPlayer = MediaPlayer.create(context, R.raw.foul)
     private var refereeEndTime: MediaPlayer = MediaPlayer.create(context, R.raw.end)
@@ -37,6 +37,7 @@ data class SoundManager(val context: Context) {
         refereeEndTime.start()
     }
     fun crowdStartupScoreboard() {
+        if (!crowdEnabled) return
         crowdStartupScoreboard = MediaPlayer.create(context, R.raw.crowd_startup_scoreboard)
         crowdStartupScoreboard.setOnCompletionListener {
             crowdStartupScoreboard()
@@ -44,6 +45,7 @@ data class SoundManager(val context: Context) {
         crowdStartupScoreboard.start()
     }
     fun crowdHalfTime() {
+        if (!crowdEnabled) return
         crowdBackground.fullStop()
         crowdBackground2.fullStop()
         crowdBackground3.fullStop()
@@ -58,6 +60,7 @@ data class SoundManager(val context: Context) {
         crowdHalfTime.start()
     }
     fun crowdGoalHome() {
+        if (!crowdEnabled) return
         media = MediaPlayer.create(context, R.raw.crowd_goal_home)
         media2 = MediaPlayer.create(context, R.raw.crowd_goal_home_2)
         media.setOnCompletionListener{
@@ -66,20 +69,24 @@ data class SoundManager(val context: Context) {
         media.start()
     }
     fun crowdGoalAway() {
+        if (!crowdEnabled) return
         crowdAwayGoal = MediaPlayer.create(context, R.raw.crowd_goal_away)
         crowdAwayGoal.start()
     }
     fun crowdPenaltyScored() {
+        if (!crowdEnabled) return
         media = MediaPlayer.create(context, R.raw.crowd_goal_home)
         media.start()
     }
     fun crowdPenaltyMissed() {
+        if (!crowdEnabled) return
         crowdPenaltyMissed = MediaPlayer.create(context, R.raw.crowd_penalties_miss)
         crowdPenaltyMissed.start()
     }
 
     private var crowdStarted = false
     fun crowdBackground() {
+        if (!crowdEnabled) return
         media.fullStop()
         media2.fullStop()
         crowdAwayGoal.fullStop()
@@ -115,12 +122,12 @@ data class SoundManager(val context: Context) {
     }
 
     fun stopAll() {
+        if (!crowdEnabled) return
         crowdStarted = false
         refereeHalfTime.fullStop()
         refereeWhistle.fullStop()
         refereeEndTime.fullStop()
         crowdHalfTime.fullStop()
-        crowdStartupScoreboard.fullStop()
         crowdBackground.fullStop()
         crowdBackground2.fullStop()
         crowdBackground3.fullStop()
@@ -135,9 +142,19 @@ data class SoundManager(val context: Context) {
 fun MediaPlayer.fullStop() {
     try {
         this.stop()
+    } catch (e: Exception) {
+        Log.d("ERRORE STOP", e.toString())
+    }
+
+    try {
         this.reset()
+    } catch (e: Exception) {
+        Log.d("ERRORE RESET", e.toString())
+    }
+
+    try {
         this.release()
     } catch (e: Exception) {
-        Log.d("ERRORE FULL STOP", e.toString())
+        Log.d("ERRORE RELEASE", e.toString())
     }
 }

@@ -10,15 +10,16 @@ import androidx.core.widget.addTextChangedListener
 import com.google.android.material.switchmaterial.SwitchMaterial
 import java.io.Serializable
 
-data class ScoreboardConfiguration(var extraTime: Boolean, var minutes: Long, var homeName: String, var awayName: String) : Serializable
+data class ScoreboardConfiguration(var extraTime: Boolean, var crowd: Boolean, var minutes: Long, var homeName: String, var awayName: String) : Serializable
 
 class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
-    private var scoreboardConfig: ScoreboardConfiguration = ScoreboardConfiguration(false, 900, "HOME", "AWAY")
+    private var scoreboardConfig: ScoreboardConfiguration = ScoreboardConfiguration(false, true, 900000, "HOME", "AWAY")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         createSpinner()
         createSwitch()
+        createCrowdSwitch()
         createProceedButton()
         createHomeTextView()
         createAwayTextView()
@@ -52,6 +53,14 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         extraTimeSwitch = findViewById(R.id.extratime_switch)
         extraTimeSwitch.setOnCheckedChangeListener { _, isChecked ->
             scoreboardConfig.extraTime = isChecked
+        }
+    }
+
+    private lateinit var crowdSwitch: SwitchMaterial
+    private fun createCrowdSwitch() {
+        crowdSwitch = findViewById(R.id.crowd_switch)
+        crowdSwitch.setOnCheckedChangeListener { _, isChecked ->
+            scoreboardConfig.crowd = isChecked
         }
     }
 
