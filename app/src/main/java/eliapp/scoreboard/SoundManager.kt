@@ -52,7 +52,6 @@ data class SoundManager(val context: Context, val crowdEnabled: Boolean) {
         crowdBackground4.fullStop()
         crowdBackground5.fullStop()
         crowdStartupScoreboard.fullStop()
-        crowdStarted = false
         crowdHalfTime = MediaPlayer.create(context, R.raw.crowd_half_time)
         crowdHalfTime.setOnCompletionListener {
             crowdHalfTime()
@@ -84,32 +83,32 @@ data class SoundManager(val context: Context, val crowdEnabled: Boolean) {
         crowdPenaltyMissed.start()
     }
 
-    private var crowdStarted = false
     fun crowdBackground() {
         if (!crowdEnabled) return
         media.fullStop()
         media2.fullStop()
         crowdAwayGoal.fullStop()
+        crowdStartupScoreboard.fullStop()
 
-        if (crowdStarted) {
-            crowdStartupScoreboard.fullStop()
-            return
-        }
+        crowdBackground = MediaPlayer.create(context, if (BuildConfig.DEBUG) R.raw.debug_sound else R.raw.crowd_background)
+        crowdBackground2 = MediaPlayer.create(context, if (BuildConfig.DEBUG) R.raw.debug_sound else R.raw.crowd_background_2)
+        crowdBackground3 = MediaPlayer.create(context, if (BuildConfig.DEBUG) R.raw.debug_sound else R.raw.crowd_background_3)
+        crowdBackground4 = MediaPlayer.create(context, if (BuildConfig.DEBUG) R.raw.debug_sound else R.raw.crowd_background_4)
+        crowdBackground5 = MediaPlayer.create(context, if (BuildConfig.DEBUG) R.raw.debug_sound else R.raw.crowd_background_5)
 
-        crowdBackground = MediaPlayer.create(context, R.raw.crowd_background)
-        crowdBackground2 = MediaPlayer.create(context, R.raw.crowd_background_2)
-        crowdBackground3 = MediaPlayer.create(context, R.raw.crowd_background_3)
-        crowdBackground5 = MediaPlayer.create(context, R.raw.crowd_background_4)
-        crowdBackground5 = MediaPlayer.create(context, R.raw.crowd_background_5)
-
-        crowdStarted = true
         crowdBackground.setOnCompletionListener {
+            crowdBackground.fullStop()
             crowdBackground2.setOnCompletionListener {
+                crowdBackground2.fullStop()
                 crowdBackground3.setOnCompletionListener {
+                    crowdBackground3.fullStop()
                     crowdBackground4.setOnCompletionListener {
+                        crowdBackground4.fullStop()
                         crowdBackground5.setOnCompletionListener {
+                            crowdBackground5.fullStop()
                             this.crowdBackground()
                         }
+                        crowdBackground5.start()
                     }
                     crowdBackground4.start()
                 }
@@ -123,7 +122,6 @@ data class SoundManager(val context: Context, val crowdEnabled: Boolean) {
 
     fun stopAll() {
         if (!crowdEnabled) return
-        crowdStarted = false
         refereeHalfTime.fullStop()
         refereeWhistle.fullStop()
         refereeEndTime.fullStop()
