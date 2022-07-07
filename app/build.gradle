@@ -4,6 +4,20 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        debug {
+            storeFile file('/Users/eliacrocetta/Desktop/Scoreboard_Android/Eliapp_debug')
+            storePassword 'eliapp'
+            keyAlias 'eliapp'
+            keyPassword 'eliapp'
+        }
+        release {
+            storeFile file('/Users/eliacrocetta/Desktop/Scoreboard_Android/Eliapp')
+            storePassword 'eliapp'
+            keyAlias 'eliapp'
+            keyPassword 'eliapp'
+        }
+    }
     compileSdk 32
 
     defaultConfig {

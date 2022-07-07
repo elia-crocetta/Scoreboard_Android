@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/Scoreboard.iml" filepath="$PROJECT_DIR$/.idea/modules/Scoreboard.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Scoreboard.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Scoreboard.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Scoreboard.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Scoreboard.app.androidTest.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Scoreboard.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Scoreboard.app.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Scoreboard.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Scoreboard.app.unitTest.iml" />
     </modules>
