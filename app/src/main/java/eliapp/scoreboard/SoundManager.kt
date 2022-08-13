@@ -3,156 +3,233 @@ package eliapp.scoreboard
 import android.content.Context
 import android.media.MediaPlayer
 import android.util.Log
-import java.lang.Exception
+import kotlin.Exception
 
 data class SoundManager(val context: Context, val crowdEnabled: Boolean) {
-    private var refereeHalfTime: MediaPlayer = MediaPlayer.create(context, R.raw.half)
-    private var refereeWhistle: MediaPlayer = MediaPlayer.create(context, R.raw.foul)
-    private var refereeEndTime: MediaPlayer = MediaPlayer.create(context, R.raw.end)
+    private lateinit var refereeMediaPlayer: MediaPlayer
+    private lateinit var crowdBackgroundMediaPlayer: MediaPlayer
+    private lateinit var crowdOnActionMediaPlayer: MediaPlayer
 
-    private var crowdStartupScoreboard: MediaPlayer = MediaPlayer.create(context, R.raw.crowd_startup_scoreboard)
-    private var crowdHalfTime: MediaPlayer = MediaPlayer.create(context, R.raw.crowd_half_time)
-
-    private var crowdBackground: MediaPlayer = MediaPlayer.create(context, R.raw.crowd_background)
-    private var crowdBackground2: MediaPlayer = MediaPlayer.create(context, R.raw.crowd_background_2)
-    private var crowdBackground3: MediaPlayer = MediaPlayer.create(context, R.raw.crowd_background_3)
-    private var crowdBackground4: MediaPlayer = MediaPlayer.create(context, R.raw.crowd_background_4)
-    private var crowdBackground5: MediaPlayer = MediaPlayer.create(context, R.raw.crowd_background_5)
-
-    private var media = MediaPlayer.create(context, R.raw.crowd_goal_home)
-    private var media2 = MediaPlayer.create(context, R.raw.crowd_goal_home_2)
-    private var crowdAwayGoal: MediaPlayer = MediaPlayer.create(context, R.raw.crowd_goal_away)
-    private var crowdPenaltyMissed: MediaPlayer = MediaPlayer.create(context, R.raw.crowd_penalties_miss)
-
-    fun refereeHalfTime() {
-        refereeHalfTime = MediaPlayer.create(context, R.raw.half)
-        refereeHalfTime.start()
+    fun refereeAction(id: Int) {
+        refereeMediaPlayer = MediaPlayer.create(context, id)
+        refereeMediaPlayer.start("refereeHalfTime")
+        refereeMediaPlayer.setOnCompletionListener {
+            refereeMediaPlayer.reset("refereeHalfTime")
+            refereeMediaPlayer.release("refereeHalfTime")
+        }
     }
-    fun refereeWhistle() {
-        refereeWhistle = MediaPlayer.create(context, R.raw.foul)
-        refereeWhistle.start()
-    }
-    fun refereeEndGame() {
-        refereeEndTime = MediaPlayer.create(context, R.raw.end)
-        refereeEndTime.start()
-    }
+
+    private var isCrowdBackgroundPlayerOnStartupSound = false
     fun crowdStartupScoreboard() {
         if (!crowdEnabled) return
-        crowdStartupScoreboard = MediaPlayer.create(context, R.raw.crowd_startup_scoreboard)
-        crowdStartupScoreboard.setOnCompletionListener {
+        crowdBackgroundMediaPlayer = MediaPlayer.create(context, R.raw.crowd_startup_scoreboard)
+        crowdBackgroundMediaPlayer.start("crowdStartupScoreboard")
+        isCrowdBackgroundPlayerOnStartupSound = true
+        crowdBackgroundMediaPlayer.setOnCompletionListener {
+            crowdBackgroundMediaPlayer.reset("crowdStartupScoreboard")
+            crowdBackgroundMediaPlayer.release("crowdStartupScoreboard")
             crowdStartupScoreboard()
         }
-        crowdStartupScoreboard.start()
     }
+
     fun crowdHalfTime() {
         if (!crowdEnabled) return
-        crowdBackground.fullStop()
-        crowdBackground2.fullStop()
-        crowdBackground3.fullStop()
-        crowdBackground4.fullStop()
-        crowdBackground5.fullStop()
-        crowdStartupScoreboard.fullStop()
-        crowdHalfTime = MediaPlayer.create(context, R.raw.crowd_half_time)
-        crowdHalfTime.setOnCompletionListener {
+        if (crowdBackgroundMediaPlayer.isPlaying) {
+            crowdBackgroundMediaPlayer.pause("crowdBackground")
+            crowdBackgroundMediaPlayer.reset("crowdBackground")
+            crowdBackgroundMediaPlayer.release("crowdBackground")
+        }
+
+        crowdBackgroundMediaPlayer = MediaPlayer.create(context, R.raw.crowd_half_time)
+        crowdBackgroundMediaPlayer.start("crowdHalfTime")
+        crowdBackgroundMediaPlayer.setOnCompletionListener {
             crowdHalfTime()
         }
-        crowdHalfTime.start()
     }
+
     fun crowdGoalHome() {
         if (!crowdEnabled) return
-        media = MediaPlayer.create(context, R.raw.crowd_goal_home)
-        media2 = MediaPlayer.create(context, R.raw.crowd_goal_home_2)
-        media.setOnCompletionListener{
-            media2.start()
+        crowdOnActionMediaPlayer = MediaPlayer.create(context, R.raw.crowd_goal_home)
+        crowdOnActionMediaPlayer.start("media")
+        Log.d("SOUND", "playing crowdHomeGoal")
+        crowdOnActionMediaPlayer.setOnCompletionListener {
+            crowdOnActionMediaPlayer.reset("crowdGoalHome")
+            crowdOnActionMediaPlayer.release("crowdGoalHome")
+            Log.d("SOUND", "completed crowdHomeGoal")
+            crowdOnActionMediaPlayer = MediaPlayer.create(context, R.raw.crowd_goal_home_2)
+            crowdOnActionMediaPlayer.start("media2")
+            Log.d("SOUND", "playing crowdHomeGoal2")
+            crowdOnActionMediaPlayer.setOnCompletionListener {
+                crowdOnActionMediaPlayer.reset("crowdGoalHome2")
+                crowdOnActionMediaPlayer.release("crowdGoalHome2")
+                Log.d("SOUND", "completed crowdHomeGoal2")
+            }
         }
-        media.start()
     }
+
     fun crowdGoalAway() {
         if (!crowdEnabled) return
-        crowdAwayGoal = MediaPlayer.create(context, R.raw.crowd_goal_away)
-        crowdAwayGoal.start()
+        crowdOnActionMediaPlayer = MediaPlayer.create(context, R.raw.crowd_goal_away)
+        crowdOnActionMediaPlayer.start("crowdAwayGoal")
+        Log.d("SOUND", "playing crowdAwayGoal")
+        crowdOnActionMediaPlayer.setOnCompletionListener {
+            crowdOnActionMediaPlayer.reset("crowdAwayGoal")
+            crowdOnActionMediaPlayer.release("crowdAwayGoal")
+            Log.d("SOUND", "completed crowdAwayGoal")
+        }
     }
+
     fun crowdPenaltyScored() {
         if (!crowdEnabled) return
-        media = MediaPlayer.create(context, R.raw.crowd_goal_home)
-        media.start()
+        crowdOnActionMediaPlayer = MediaPlayer.create(context, R.raw.crowd_goal_home)
+        crowdOnActionMediaPlayer.start("media")
+        crowdOnActionMediaPlayer.setOnCompletionListener {
+            crowdOnActionMediaPlayer.reset("crowdPenaltyScored")
+            crowdOnActionMediaPlayer.release("crowdPenaltyScored")
+        }
     }
+
     fun crowdPenaltyMissed() {
         if (!crowdEnabled) return
-        crowdPenaltyMissed = MediaPlayer.create(context, R.raw.crowd_penalties_miss)
-        crowdPenaltyMissed.start()
+        crowdOnActionMediaPlayer = MediaPlayer.create(context, R.raw.crowd_penalties_miss)
+        crowdOnActionMediaPlayer.start("crowdPenaltyMissed")
+        crowdOnActionMediaPlayer.setOnCompletionListener {
+            crowdOnActionMediaPlayer.reset("crowdPenaltyMissed")
+            crowdOnActionMediaPlayer.release("crowdPenaltyMissed")
+        }
     }
 
     fun crowdBackground() {
         if (!crowdEnabled) return
-        media.fullStop()
-        media2.fullStop()
-        crowdAwayGoal.fullStop()
-        crowdStartupScoreboard.fullStop()
+        try {
+            if (this::crowdBackgroundMediaPlayer.isInitialized && crowdBackgroundMediaPlayer.isPlaying) {
+                if (isCrowdBackgroundPlayerOnStartupSound) {
+                    crowdBackgroundMediaPlayer.stop("crowdBackgroundMediaPlayer")
+                    crowdBackgroundMediaPlayer.reset("crowdBackgroundMediaPlayer")
+                    crowdBackgroundMediaPlayer.release("crowdBackgroundMediaPlayer")
+                    isCrowdBackgroundPlayerOnStartupSound = false
+                } else {
 
-        crowdBackground = MediaPlayer.create(context, if (BuildConfig.DEBUG) R.raw.debug_sound else R.raw.crowd_background)
-        crowdBackground2 = MediaPlayer.create(context, if (BuildConfig.DEBUG) R.raw.debug_sound else R.raw.crowd_background_2)
-        crowdBackground3 = MediaPlayer.create(context, if (BuildConfig.DEBUG) R.raw.debug_sound else R.raw.crowd_background_3)
-        crowdBackground4 = MediaPlayer.create(context, if (BuildConfig.DEBUG) R.raw.debug_sound else R.raw.crowd_background_4)
-        crowdBackground5 = MediaPlayer.create(context, if (BuildConfig.DEBUG) R.raw.debug_sound else R.raw.crowd_background_5)
-
-        crowdBackground.setOnCompletionListener {
-            crowdBackground.fullStop()
-            crowdBackground2.setOnCompletionListener {
-                crowdBackground2.fullStop()
-                crowdBackground3.setOnCompletionListener {
-                    crowdBackground3.fullStop()
-                    crowdBackground4.setOnCompletionListener {
-                        crowdBackground4.fullStop()
-                        crowdBackground5.setOnCompletionListener {
-                            crowdBackground5.fullStop()
-                            this.crowdBackground()
-                        }
-                        crowdBackground5.start()
+                    if (this::crowdOnActionMediaPlayer.isInitialized && crowdOnActionMediaPlayer.isPlaying) {
+                        crowdOnActionMediaPlayer.stop("crowdBackgroundMediaPlayer")
+                        crowdOnActionMediaPlayer.reset("crowdBackgroundMediaPlayer")
+                        crowdOnActionMediaPlayer.release("crowdBackgroundMediaPlayer")
                     }
-                    crowdBackground4.start()
+                    return
                 }
-                crowdBackground3.start()
             }
-            crowdBackground2.start()
+        } catch (e: Exception) {
+            Log.d("ERRORE ISPLAYING", e.toString())
         }
-        crowdBackground.start()
-        crowdStartupScoreboard.fullStop()
+
+        crowdBackgroundMediaPlayer = MediaPlayer.create(context, R.raw.crowd_background)
+        crowdBackgroundMediaPlayer.start("crowdBackground")
+        Log.d("SOUND", "playing crowdBackground")
+
+        crowdBackgroundMediaPlayer.setOnCompletionListener {
+            crowdBackgroundMediaPlayer.reset("crowdBackground")
+            Log.d("SOUND", "stopped crowdBackground")
+            crowdBackgroundMediaPlayer = MediaPlayer.create(context, R.raw.crowd_background_2)
+            crowdBackgroundMediaPlayer.start("crowdBackground2")
+            Log.d("SOUND", "playing crowdBackground2")
+
+            crowdBackgroundMediaPlayer.setOnCompletionListener {
+                crowdBackgroundMediaPlayer.reset("crowdBackground2")
+                Log.d("SOUND", "stopped crowdBackground2")
+
+                crowdBackgroundMediaPlayer = MediaPlayer.create(context, R.raw.crowd_background_3)
+                crowdBackgroundMediaPlayer.start("crowdBackground3")
+                Log.d("SOUND", "playing crowdBackground3")
+
+                crowdBackgroundMediaPlayer.setOnCompletionListener {
+                    crowdBackgroundMediaPlayer.reset("crowdBackground3")
+                    Log.d("SOUND", "stopped crowdBackground3")
+
+                    crowdBackgroundMediaPlayer =
+                        MediaPlayer.create(context, R.raw.crowd_background_4)
+                    crowdBackgroundMediaPlayer.start("crowdBackground4")
+                    Log.d("SOUND", "playing crowdBackground4")
+
+                    crowdBackgroundMediaPlayer.setOnCompletionListener {
+                        crowdBackgroundMediaPlayer.reset("crowdBackground4")
+                        Log.d("SOUND", "stopped crowdBackground4")
+
+                        crowdBackgroundMediaPlayer =
+                            MediaPlayer.create(context, R.raw.crowd_background_5)
+                        crowdBackgroundMediaPlayer.start("crowdBackground5")
+                        Log.d("SOUND", "playing crowdBackground5")
+
+                        crowdBackgroundMediaPlayer.setOnCompletionListener {
+                            crowdBackgroundMediaPlayer.reset("crowdBackground5")
+                            crowdBackgroundMediaPlayer.release("crowdBackground4")
+                            Log.d("SOUND", "stopped crowdBackground5")
+                            this.crowdBackground()
+                            Log.d("SOUND", "Recursive function crowdBackground()")
+                        }
+                    }
+                }
+            }
+        }
     }
 
     fun stopAll() {
         if (!crowdEnabled) return
-        refereeHalfTime.fullStop()
-        refereeWhistle.fullStop()
-        refereeEndTime.fullStop()
-        crowdHalfTime.fullStop()
-        crowdBackground.fullStop()
-        crowdBackground2.fullStop()
-        crowdBackground3.fullStop()
-        crowdBackground4.fullStop()
-        crowdBackground5.fullStop()
-        crowdStartupScoreboard.fullStop()
-        media.fullStop()
-        media2.fullStop()
+        if (this::crowdOnActionMediaPlayer.isInitialized) {
+            crowdOnActionMediaPlayer.stop("crowdOnActionMediaPlayer")
+            crowdOnActionMediaPlayer.reset("crowdOnActionMediaPlayer")
+            crowdOnActionMediaPlayer.release("crowdOnActionMediaPlayer")
+        }
+
+        if (this::crowdBackgroundMediaPlayer.isInitialized) {
+            crowdBackgroundMediaPlayer.stop("crowdBackgroundMediaPlayer")
+            crowdBackgroundMediaPlayer.reset("crowdBackgroundMediaPlayer")
+            crowdBackgroundMediaPlayer.release("crowdBackgroundMediaPlayer")
+        }
+
+        if (this::refereeMediaPlayer.isInitialized) {
+            refereeMediaPlayer.stop("refereeMediaPlayer")
+            refereeMediaPlayer.reset("refereeMediaPlayer")
+            refereeMediaPlayer.release("refereeMediaPlayer")
+        }
     }
 }
 
-fun MediaPlayer.fullStop() {
-    try {
-        this.stop()
-    } catch (e: Exception) {
-        Log.d("ERRORE STOP", e.toString())
-    }
-
+fun MediaPlayer.reset(file: String) {
     try {
         this.reset()
     } catch (e: Exception) {
-        Log.d("ERRORE RESET", e.toString())
+        Log.d("ERRORE RESET $file", e.toString())
     }
+}
 
+fun MediaPlayer.pause(file: String) {
+    try {
+        this.pause()
+    } catch (e: Exception) {
+        Log.d("ERRORE PAUSE $file", e.toString())
+    }
+}
+
+fun MediaPlayer.stop(file: String) {
+    try {
+        this.stop()
+    } catch (e: Exception) {
+        Log.d("ERRORE STOP $file", e.toString())
+    }
+}
+
+fun MediaPlayer.release(file: String) {
     try {
         this.release()
     } catch (e: Exception) {
-        Log.d("ERRORE RELEASE", e.toString())
+        Log.d("ERRORE RELEASE $file", e.toString())
+    }
+}
+
+fun MediaPlayer.start(file: String) {
+    try {
+        this.start()
+    } catch (e: Exception) {
+        Log.d("ERRORE START $file", e.toString())
     }
 }

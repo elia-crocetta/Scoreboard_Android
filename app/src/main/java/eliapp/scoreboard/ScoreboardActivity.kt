@@ -132,7 +132,7 @@ class ScoreboardActivity : AppCompatActivity() {
             regularTimeTimerIsRunning = !regularTimeTimerIsRunning
             additionalBottomTextView.text = null
             if (!regularTimeTimerIsRunning) {
-                soundManager.refereeWhistle()
+                soundManager.refereeAction(R.raw.foul)
                 soundManager.crowdBackground()
                 createRegularTimeCounter()
             } else {
@@ -143,7 +143,7 @@ class ScoreboardActivity : AppCompatActivity() {
                     }
 
                     override fun onFinish() {
-                        soundManager.refereeWhistle()
+                        soundManager.refereeAction(R.raw.foul)
                         countDownToStart = 3
                         setAdditionalUpTextView()
                         createRegularTimeCounter()
@@ -280,7 +280,7 @@ class ScoreboardActivity : AppCompatActivity() {
                     additionalUpTextView.text = getString(R.string.second_half)
                 } else {
                     soundManager.crowdHalfTime()
-                    soundManager.refereeHalfTime()
+                    soundManager.refereeAction(R.raw.half)
                     additionalUpTextView.text = getString(R.string.half_time)
                 }
             }
@@ -289,7 +289,7 @@ class ScoreboardActivity : AppCompatActivity() {
                     additionalUpTextView.text = getString(R.string.first_extra_half)
                 } else {
                     soundManager.crowdHalfTime()
-                    soundManager.refereeEndGame()
+                    soundManager.refereeAction(R.raw.end)
                     additionalUpTextView.text = getString(R.string.extra_time)
                 }
             }
@@ -298,18 +298,18 @@ class ScoreboardActivity : AppCompatActivity() {
                     additionalUpTextView.text = getString(R.string.second_extra_half)
                 } else {
                     soundManager.crowdHalfTime()
-                    soundManager.refereeHalfTime()
+                    soundManager.refereeAction(R.raw.half)
                     additionalUpTextView.text = getString(R.string.half_time)
                 }
             }
             MatchTime.Penalties -> {
                 soundManager.crowdHalfTime()
-                soundManager.refereeEndGame()
+                soundManager.refereeAction(R.raw.end)
                 additionalUpTextView.text = getString(R.string.penalties)
             }
             MatchTime.EndGame -> {
                 soundManager.crowdHalfTime()
-                soundManager.refereeEndGame()
+                soundManager.refereeAction(R.raw.end)
                 if (homePointValue > awayPointValue) {
                     additionalUpTextView.text = getString(R.string.end_game, getString(R.string.home_wins))
                 } else if (homePointValue < awayPointValue) {
