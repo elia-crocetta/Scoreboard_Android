@@ -4,6 +4,12 @@
     <string name="extra_time_option">Supp. in caso di parità</string>
     <string name="duration_time">Durata tempo</string>
     <string name="duration_time_spinner">Scegli</string>
+    <string-array name="Array_Minutes_Debug">
+        <item>15 minuti</item>
+        <item>10 minuti</item>
+        <item>5 minuti</item>
+        <item>10 secondi</item>
+    </string-array>
     <string-array name="Array_Minutes">
         <item>15 minuti</item>
         <item>10 minuti</item>

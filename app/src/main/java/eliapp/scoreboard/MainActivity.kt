@@ -23,6 +23,9 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         createProceedButton()
         createHomeTextView()
         createAwayTextView()
+        if (BuildConfig.DEBUG) {
+            arraySelectionMinutes+=10000
+        }
     }
 
     private lateinit var spinner: Spinner
@@ -30,7 +33,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         spinner = findViewById(R.id.select_minutes_spinner)
         ArrayAdapter.createFromResource(
             this,
-            R.array.Array_Minutes,
+            if (BuildConfig.DEBUG) { R.array.Array_Minutes_Debug } else { R.array.Array_Minutes},
             android.R.layout.simple_spinner_item,
         ).also { adapter ->
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -39,7 +42,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         spinner.onItemSelectedListener = this
     }
 
-    private val arraySelectionMinutes = arrayOf<Long>(900000, 600000, 300000)
+    private var arraySelectionMinutes = arrayOf<Long>(900000, 600000, 300000)
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         scoreboardConfig.minutes = arraySelectionMinutes[position]
     }

@@ -3,6 +3,7 @@ package eliapp.scoreboard
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.text.TextUtils
 import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.view.View
@@ -35,12 +36,13 @@ class ScoreboardActivity : AppCompatActivity() {
     private var regularTimeTimerIsRunning = false
     private var valueTimer: Long = 0
     private var _millisUntilFinished: Long = 0
+    private var _millisUntilFinishedForExtraTime: Long = 0
 
     private lateinit var extraTimeTimer: CountDownTimer
     private var valueTimerExtra: Long = 0
     private fun actualExtraTimeValue(): Long {
         return when (valueTimerExtra) {
-            in 0 .. 50 -> 0
+            in 0 .. 50 -> (if (BuildConfig.DEBUG) 60000 else 0)
             in 51 .. 110 -> 60000
             in 111 .. 170 -> 120000
             in 171 .. 230 -> 180000
@@ -156,23 +158,39 @@ class ScoreboardActivity : AppCompatActivity() {
     private fun createRegularTimeCounter() {
         val zeroLong: Long = 0
         val durationHalf: Long = if (currentMatchTime.isInExtraTime()) 2700000 / 3 else 2700000
-        val time = if (_millisUntilFinished == zeroLong) durationHalf else { _millisUntilFinished }
-        val actualTime = if (matchIsInExtraMinutes) actualExtraTimeValue() else time
+        val actualTime = if (matchIsInExtraMinutes) {
+            if (_millisUntilFinishedForExtraTime == zeroLong) {
+                actualExtraTimeValue()
+            } else {
+                _millisUntilFinishedForExtraTime
+            }
+        } else  {
+            if (_millisUntilFinished == zeroLong) {
+                durationHalf
+            } else {
+                _millisUntilFinished
+            }
+        }
         val actualInterval: Long = if (matchIsInExtraMinutes) 1000 else { 1000/(2700000 / configuration.minutes) }
 
         regularTimeTimer = object : CountDownTimer(actualTime, actualInterval) {
             override fun onTick(millisUntilFinished: Long) {
-                _millisUntilFinished = millisUntilFinished
+                Log.d("TIMER", "${actualTime}")
                 if (regularTimeTimerIsRunning) {
                     if (extraTimeTimerIsRunning) {
-                        extraTimeTimer.cancel()
                         extraTimeTimerIsRunning = false
+                        extraTimeTimer.cancel()
                     }
                     if (matchIsInExtraMinutes) {
+                        _millisUntilFinishedForExtraTime = millisUntilFinished
                         elapsedExtraMinutes++
                         val formatted = elapsedExtraMinutes.formatValueForScoreboard()
                         additionalUpTextView.text = getString(R.string.over_minutes, formatted)
+                        if (TextUtils.isEmpty(additionalBottomTextView.text)) {
+                            additionalBottomTextView.text = getString(R.string.announce_over_time, (actualExtraTimeValue() / 60000).toString())
+                        }
                     } else {
+                        _millisUntilFinished = millisUntilFinished
                         valueTimer++
                         val formatted = valueTimer.formatValueForScoreboard()
                         timeTextView.text = formatted
@@ -211,6 +229,7 @@ class ScoreboardActivity : AppCompatActivity() {
                     regularTimeTimerIsRunning = false
                     matchIsInExtraMinutes = false
                     _millisUntilFinished = 0
+                    _millisUntilFinishedForExtraTime = 0
                     valueTimerExtra = 0
                     elapsedExtraMinutes = 0
                     additionalBottomTextView.text = ""
@@ -253,7 +272,7 @@ class ScoreboardActivity : AppCompatActivity() {
     private fun createExtraTimeCounter() {
         extraTimeTimer = object : CountDownTimer(300000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
-                if (valueTimerExtra<300000) {
+                if (valueTimerExtra<300 && !matchIsInExtraMinutes) {
                     Log.d("EXTRA-TIMER", "$valueTimerExtra")
                     valueTimerExtra++
                 } else {
