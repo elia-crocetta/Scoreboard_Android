@@ -1,6 +1,7 @@
 package eliapp.scoreboard
 
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
@@ -10,19 +11,35 @@ import androidx.core.widget.addTextChangedListener
 import com.google.android.material.switchmaterial.SwitchMaterial
 import java.io.Serializable
 
-data class ScoreboardConfiguration(var extraTime: Boolean, var crowd: Boolean, var minutes: Long, var homeName: String, var awayName: String) : Serializable
+data class ScoreboardConfiguration(
+    var extraTime: Boolean,
+    var crowd: Boolean,
+    var minutes: Long,
+    var homeName: String,
+    var awayName: String,
+    var homeFactor: Boolean
+    ) : Serializable
 
 class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
-    private var scoreboardConfig: ScoreboardConfiguration = ScoreboardConfiguration(false, true, 900000, "HOME", "AWAY")
+    private var scoreboardConfig: ScoreboardConfiguration = ScoreboardConfiguration(
+        false,
+        true,
+        900000,
+        "HOME",
+        "AWAY",
+        false
+    )
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         createSpinner()
         createSwitch()
         createCrowdSwitch()
         createProceedButton()
         createHomeTextView()
         createAwayTextView()
+        createHomeFactorSwitch()
         if (BuildConfig.DEBUG) {
             arraySelectionMinutes+=10000
         }
@@ -64,6 +81,14 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         crowdSwitch = findViewById(R.id.crowd_switch)
         crowdSwitch.setOnCheckedChangeListener { _, isChecked ->
             scoreboardConfig.crowd = isChecked
+        }
+    }
+
+    private lateinit var crowdHomeFactorSwitch: SwitchMaterial
+    private fun createHomeFactorSwitch() {
+        crowdHomeFactorSwitch = findViewById(R.id.home_factor_switch)
+        crowdSwitch.setOnCheckedChangeListener { _, isChecked ->
+            scoreboardConfig.homeFactor = isChecked
         }
     }
 

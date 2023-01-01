@@ -1,5 +1,6 @@
 package eliapp.scoreboard
 
+import android.content.pm.ActivityInfo
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -42,11 +43,9 @@ class ScoreboardActivity : AppCompatActivity() {
     private var valueTimerExtra: Long = 0
     private fun actualExtraTimeValue(): Long {
         return when (valueTimerExtra) {
-            in 0 .. 50 -> (if (BuildConfig.DEBUG) 60000 else 0)
-            in 51 .. 110 -> 60000
-            in 111 .. 170 -> 120000
-            in 171 .. 230 -> 180000
-            in 231 .. 290 -> 240000
+            in 0 .. 110 -> (if (BuildConfig.DEBUG) 60000 else 0)
+            in 111 .. 230 -> 120000
+            in 231 .. 350 -> 240000
             else -> 300000
         }
     }
@@ -60,6 +59,7 @@ class ScoreboardActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_scoreboard)
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
         actionBar?.hide()
 
@@ -108,7 +108,11 @@ class ScoreboardActivity : AppCompatActivity() {
         awayPointTextView.setOnClickListener {
             it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY, HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING)
             if (regularTimeTimerIsRunning) {
-                soundManager.crowdGoalAway()
+                if (configuration.homeFactor) {
+                    soundManager.crowdGoalAway()
+                } else {
+                    soundManager.crowdGoalHome()
+                }
                 regularTimeTimerIsRunning = false
                 awayPointValue+=1
                 awayPointTextView.text = "$awayPointValue"
@@ -175,7 +179,7 @@ class ScoreboardActivity : AppCompatActivity() {
 
         regularTimeTimer = object : CountDownTimer(actualTime, actualInterval) {
             override fun onTick(millisUntilFinished: Long) {
-                Log.d("TIMER", "${actualTime}")
+                Log.d("TIMER", "$actualTime")
                 if (regularTimeTimerIsRunning) {
                     if (extraTimeTimerIsRunning) {
                         extraTimeTimerIsRunning = false
