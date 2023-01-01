@@ -87,7 +87,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     private lateinit var crowdHomeFactorSwitch: SwitchMaterial
     private fun createHomeFactorSwitch() {
         crowdHomeFactorSwitch = findViewById(R.id.home_factor_switch)
-        crowdSwitch.setOnCheckedChangeListener { _, isChecked ->
+        crowdHomeFactorSwitch.setOnCheckedChangeListener { _, isChecked ->
             scoreboardConfig.homeFactor = isChecked
         }
     }
