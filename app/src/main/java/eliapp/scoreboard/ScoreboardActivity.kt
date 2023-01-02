@@ -334,9 +334,9 @@ class ScoreboardActivity : AppCompatActivity() {
                 soundManager.crowdHalfTime()
                 soundManager.refereeAction(R.raw.end)
                 if (homePointValue > awayPointValue) {
-                    additionalUpTextView.text = getString(R.string.end_game, getString(R.string.home_wins))
+                    additionalUpTextView.text = getString(R.string.end_game, getString(R.string.team_wins, configuration.homeName))
                 } else if (homePointValue < awayPointValue) {
-                    additionalUpTextView.text = getString(R.string.end_game, getString(R.string.away_wins))
+                    additionalUpTextView.text = getString(R.string.end_game, getString(R.string.team_wins, configuration.awayName))
                 } else if (homePointValue == awayPointValue) {
                     additionalUpTextView.text = getString(R.string.end_game, getString(R.string.tie))
                 }

@@ -12,14 +12,18 @@
 
     <TextView
         android:id="@+id/homeNameTextView"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
+        android:layout_marginEnd="16dp"
+        android:maxLines="1"
         android:text="@string/home"
         android:textColor="@color/white"
         android:textSize="48sp"
         android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/additionalUpTextView"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -27,14 +31,14 @@
         android:id="@+id/additionalUpTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="24dp"
         android:text="@string/kick_off"
         android:textAlignment="center"
         android:textColor="@color/white"
         android:textSize="34sp"
         android:textStyle="normal"
-        app:layout_constraintEnd_toStartOf="@+id/awayNameTextView"
-        app:layout_constraintStart_toEndOf="@+id/homeNameTextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/homeNameTextView" />
 
     <TextView
@@ -53,29 +57,36 @@
 
     <TextView
         android:id="@+id/awayNameTextView"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="32dp"
         android:layout_marginEnd="32dp"
+        android:maxLines="1"
         android:text="@string/away"
+        android:textAlignment="viewEnd"
         android:textColor="@color/white"
         android:textSize="48sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/additionalUpTextView"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/homePointTextView"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="32dp"
         android:text="@string/zero"
         android:textColor="@color/white"
         android:textSize="120sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/homeNameTextView"
         app:layout_constraintStart_toStartOf="@+id/homeNameTextView"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/homeNameTextView" />
 
     <TextView
         android:id="@+id/timeTextView"
@@ -93,13 +104,15 @@
     <TextView
         android:id="@+id/awayPointTextView"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="32dp"
         android:text="@string/zero"
         android:textColor="@color/white"
         android:textSize="120sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/awayNameTextView"
-        app:layout_constraintStart_toStartOf="@+id/awayNameTextView"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/awayNameTextView" />
 </androidx.constraintlayout.widget.ConstraintLayout>

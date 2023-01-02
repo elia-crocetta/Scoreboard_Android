@@ -26,9 +26,8 @@
     <string name="half_time">Half time</string>
     <string name="end_game">End game\n%1$s</string>
     <string name="extra_time">Extra time</string>
-    <string name="home_wins">Home wins</string>
+    <string name="team_wins">%1$s wins</string>
     <string name="tie">Tie</string>
-    <string name="away_wins">Away wins</string>
     <string name="first_extra_half">1st Extra Half</string>
     <string name="second_extra_half">2nd Extra Half</string>
     <string name="penalties">Penalties</string>
