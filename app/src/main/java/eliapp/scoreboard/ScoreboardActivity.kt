@@ -43,7 +43,7 @@ class ScoreboardActivity : AppCompatActivity() {
     private var valueTimerExtra: Long = 0
     private fun actualExtraTimeValue(): Long {
         return when (valueTimerExtra) {
-            in 0 .. 110 -> (if (BuildConfig.DEBUG) 60000 else 0)
+            in 0 .. 110 -> 0
             in 111 .. 230 -> 120000
             in 231 .. 350 -> 240000
             else -> 300000
@@ -66,7 +66,7 @@ class ScoreboardActivity : AppCompatActivity() {
         val config = intent.getSerializableExtra("CONFIG") as? ScoreboardConfiguration ?: return
         configuration = config
 
-        soundManager = SoundManager(applicationContext, configuration.crowd)
+        soundManager = SoundManager(this, configuration.crowd)
 
         createHomePointTextView()
         createAwayPointTextView()
@@ -87,7 +87,7 @@ class ScoreboardActivity : AppCompatActivity() {
         homePointTextView.setOnClickListener {
             it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY, HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING)
             if (regularTimeTimerIsRunning) {
-                soundManager.crowdGoalHome()
+                soundManager.crowdGoalHome(R.raw.crowd_goal_home)
                 regularTimeTimerIsRunning = false
                 homePointValue+=1
                 homePointTextView.text = "$homePointValue"
@@ -111,7 +111,7 @@ class ScoreboardActivity : AppCompatActivity() {
                 if (configuration.homeFactor) {
                     soundManager.crowdGoalAway()
                 } else {
-                    soundManager.crowdGoalHome()
+                    soundManager.crowdGoalHome(R.raw.crowd_goal_home)
                 }
                 regularTimeTimerIsRunning = false
                 awayPointValue+=1
@@ -126,20 +126,25 @@ class ScoreboardActivity : AppCompatActivity() {
     }
 
     private var countDownToStart = 3
+    // To prevent crowd background to reproduce every referee's whistle
+    private var keepCrowdBackground = false
     private fun createTimeTextView() {
         timeTextView = findViewById(R.id.timeTextView)
         timeTextView.isClickable = true
         timeTextView.setOnClickListener {
-            soundManager.crowdBackground()
+            if (!keepCrowdBackground) {
+                soundManager.crowdBackground(R.raw.crowd_background)
+                keepCrowdBackground = true
+            }
             if (currentMatchTime == MatchTime.Penalties || currentMatchTime == MatchTime.EndGame) {
                 return@setOnClickListener
             }
             it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY, HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING)
+            soundManager.stopCrowdGoals()
             regularTimeTimerIsRunning = !regularTimeTimerIsRunning
             additionalBottomTextView.text = null
             if (!regularTimeTimerIsRunning) {
                 soundManager.refereeAction(R.raw.foul)
-                soundManager.crowdBackground()
                 createRegularTimeCounter()
             } else {
                 object  : CountDownTimer(3000, 1000) {
@@ -151,7 +156,7 @@ class ScoreboardActivity : AppCompatActivity() {
                     override fun onFinish() {
                         soundManager.refereeAction(R.raw.foul)
                         countDownToStart = 3
-                        setAdditionalUpTextView()
+                        setAdditionalUpTextViewAndSetAudio()
                         createRegularTimeCounter()
                     }
                 }.start()
@@ -266,7 +271,7 @@ class ScoreboardActivity : AppCompatActivity() {
                         else -> {}
                     }
                     timeTextView.text = valueTimer.formatValueForScoreboard()
-                    setAdditionalUpTextView()
+                    setAdditionalUpTextViewAndSetAudio()
                 }
             }
         }
@@ -295,7 +300,7 @@ class ScoreboardActivity : AppCompatActivity() {
         soundManager.stopAll()
     }
 
-    private fun setAdditionalUpTextView() {
+    private fun setAdditionalUpTextViewAndSetAudio() {
         when (currentMatchTime) {
             MatchTime.FirstHalf -> additionalUpTextView.text = getString(R.string.first_half)
             MatchTime.SecondHalf -> {
@@ -303,6 +308,7 @@ class ScoreboardActivity : AppCompatActivity() {
                     additionalUpTextView.text = getString(R.string.second_half)
                 } else {
                     soundManager.crowdHalfTime()
+                    keepCrowdBackground = false
                     soundManager.refereeAction(R.raw.half)
                     additionalUpTextView.text = getString(R.string.half_time)
                 }
@@ -312,6 +318,7 @@ class ScoreboardActivity : AppCompatActivity() {
                     additionalUpTextView.text = getString(R.string.first_extra_half)
                 } else {
                     soundManager.crowdHalfTime()
+                    keepCrowdBackground = false
                     soundManager.refereeAction(R.raw.end)
                     additionalUpTextView.text = getString(R.string.extra_time)
                 }
@@ -321,17 +328,20 @@ class ScoreboardActivity : AppCompatActivity() {
                     additionalUpTextView.text = getString(R.string.second_extra_half)
                 } else {
                     soundManager.crowdHalfTime()
+                    keepCrowdBackground = false
                     soundManager.refereeAction(R.raw.half)
                     additionalUpTextView.text = getString(R.string.half_time)
                 }
             }
             MatchTime.Penalties -> {
                 soundManager.crowdHalfTime()
+                keepCrowdBackground = false
                 soundManager.refereeAction(R.raw.end)
                 additionalUpTextView.text = getString(R.string.penalties)
             }
             MatchTime.EndGame -> {
                 soundManager.crowdHalfTime()
+                keepCrowdBackground = false
                 soundManager.refereeAction(R.raw.end)
                 if (homePointValue > awayPointValue) {
                     additionalUpTextView.text = getString(R.string.end_game, getString(R.string.team_wins, configuration.homeName))

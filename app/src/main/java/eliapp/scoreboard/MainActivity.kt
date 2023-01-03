@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     private var scoreboardConfig: ScoreboardConfiguration = ScoreboardConfiguration(
         false,
         true,
-        900000,
+        if (BuildConfig.DEBUG) 10000 else 900000,
         "HOME",
         "AWAY",
         false
@@ -60,12 +60,22 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     }
 
     private var arraySelectionMinutes = arrayOf<Long>(900000, 600000, 300000)
+    private var firstChoosed = false
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-        scoreboardConfig.minutes = arraySelectionMinutes[position]
+        if (BuildConfig.DEBUG) {
+            if (!firstChoosed) {
+                scoreboardConfig.minutes = arraySelectionMinutes[3]
+                firstChoosed = true
+            } else {
+                scoreboardConfig.minutes = arraySelectionMinutes[position]
+            }
+        } else {
+            scoreboardConfig.minutes = arraySelectionMinutes[position]
+        }
     }
 
     override fun onNothingSelected(parent: AdapterView<*>?) {
-        scoreboardConfig.minutes = arraySelectionMinutes[0]
+        scoreboardConfig.minutes = (if (BuildConfig.DEBUG) arraySelectionMinutes[3] else arraySelectionMinutes[0])
     }
 
     private lateinit var extraTimeSwitch: SwitchMaterial

@@ -6,191 +6,328 @@ import android.util.Log
 import kotlin.Exception
 
 data class SoundManager(val context: Context, val crowdEnabled: Boolean) {
-    private lateinit var refereeMediaPlayer: MediaPlayer
-    private lateinit var crowdBackgroundMediaPlayer: MediaPlayer
-    private lateinit var crowdOnActionMediaPlayer: MediaPlayer
+    private var refereeMediaPlayer: MediaPlayer? = null
+    private var crowdBackgroundMediaPlayer: MediaPlayer? = null
+    private var crowdOnActionMediaPlayer: MediaPlayer? = null
 
     fun refereeAction(id: Int) {
-        refereeMediaPlayer = MediaPlayer.create(context, id)
-        refereeMediaPlayer.start("refereeHalfTime")
-        refereeMediaPlayer.setOnCompletionListener {
-            refereeMediaPlayer.reset("refereeHalfTime")
-            refereeMediaPlayer.release("refereeHalfTime")
+        if (!crowdEnabled) return
+        val stringFileName = "refereeWhistle"
+
+        if (refereeMediaPlayer?.isPlaying == true) {
+            refereeMediaPlayer?.stop(stringFileName)
+            refereeMediaPlayer?.reset(stringFileName)
+        }
+
+        val assetFileDescriptor = context.resources.openRawResourceFd(id) ?: return
+
+        refereeMediaPlayer = MediaPlayer().apply {
+            setOnPreparedListener {
+                start(stringFileName)
+            }
+
+            setOnCompletionListener {
+                reset(stringFileName)
+            }
+        }
+
+        refereeMediaPlayer?.run {
+            reset(stringFileName)
+            setDataSource(
+                assetFileDescriptor.fileDescriptor,
+                assetFileDescriptor.startOffset,
+                assetFileDescriptor.declaredLength
+            )
+            prepareAsync()
         }
     }
 
-    private var isCrowdBackgroundPlayerOnStartupSound = false
     fun crowdStartupScoreboard() {
         if (!crowdEnabled) return
-        crowdBackgroundMediaPlayer = MediaPlayer.create(context, R.raw.crowd_startup_scoreboard)
-        crowdBackgroundMediaPlayer.start("crowdStartupScoreboard")
-        isCrowdBackgroundPlayerOnStartupSound = true
-        crowdBackgroundMediaPlayer.setOnCompletionListener {
-            crowdBackgroundMediaPlayer.reset("crowdStartupScoreboard")
-            crowdBackgroundMediaPlayer.release("crowdStartupScoreboard")
-            crowdStartupScoreboard()
+        val stringFileName = "crowdBackground"
+
+        if (crowdBackgroundMediaPlayer?.isPlaying == true) {
+            crowdBackgroundMediaPlayer?.stop(stringFileName)
+            crowdBackgroundMediaPlayer?.reset(stringFileName)
+        }
+
+        val assetFileDescriptor =
+            context.resources.openRawResourceFd(R.raw.crowd_startup_scoreboard) ?: return
+
+        crowdBackgroundMediaPlayer = MediaPlayer().apply {
+            setOnPreparedListener {
+                start(stringFileName)
+            }
+
+            setOnCompletionListener {
+                reset(stringFileName)
+                crowdStartupScoreboard()
+            }
+        }
+
+        crowdBackgroundMediaPlayer?.run {
+            reset("crowdStartupScoreboard")
+            setDataSource(
+                assetFileDescriptor.fileDescriptor,
+                assetFileDescriptor.startOffset,
+                assetFileDescriptor.declaredLength
+            )
+            prepareAsync()
         }
     }
 
     fun crowdHalfTime() {
         if (!crowdEnabled) return
-        if (crowdBackgroundMediaPlayer.isPlaying) {
-            crowdBackgroundMediaPlayer.pause("crowdBackground")
-            crowdBackgroundMediaPlayer.reset("crowdBackground")
-            crowdBackgroundMediaPlayer.release("crowdBackground")
+        val stringFileName = "crowdHalfTime"
+
+        if (crowdBackgroundMediaPlayer?.isPlaying == true) {
+            crowdBackgroundMediaPlayer?.stop(stringFileName)
+            crowdBackgroundMediaPlayer?.reset(stringFileName)
         }
 
-        crowdBackgroundMediaPlayer = MediaPlayer.create(context, R.raw.crowd_half_time)
-        crowdBackgroundMediaPlayer.start("crowdHalfTime")
-        crowdBackgroundMediaPlayer.setOnCompletionListener {
-            crowdHalfTime()
+        val assetFileDescriptor =
+            context.resources.openRawResourceFd(R.raw.crowd_half_time) ?: return
+
+        crowdBackgroundMediaPlayer = MediaPlayer().apply {
+            setOnPreparedListener {
+                start(stringFileName)
+            }
+
+            setOnCompletionListener {
+                reset(stringFileName)
+                crowdHalfTime()
+            }
+        }
+
+        crowdBackgroundMediaPlayer?.run {
+            reset(stringFileName)
+            setDataSource(
+                assetFileDescriptor.fileDescriptor,
+                assetFileDescriptor.startOffset,
+                assetFileDescriptor.declaredLength
+            )
+            prepareAsync()
         }
     }
 
-    fun crowdGoalHome() {
+    fun crowdGoalHome(idResource: Int) {
         if (!crowdEnabled) return
-        crowdOnActionMediaPlayer = MediaPlayer.create(context, R.raw.crowd_goal_home)
-        crowdOnActionMediaPlayer.start("media")
-        Log.d("SOUND", "playing crowdHomeGoal")
-        crowdOnActionMediaPlayer.setOnCompletionListener {
-            crowdOnActionMediaPlayer.reset("crowdGoalHome")
-            crowdOnActionMediaPlayer.release("crowdGoalHome")
-            Log.d("SOUND", "completed crowdHomeGoal")
-            crowdOnActionMediaPlayer = MediaPlayer.create(context, R.raw.crowd_goal_home_2)
-            crowdOnActionMediaPlayer.start("media2")
-            Log.d("SOUND", "playing crowdHomeGoal2")
-            crowdOnActionMediaPlayer.setOnCompletionListener {
-                crowdOnActionMediaPlayer.reset("crowdGoalHome2")
-                crowdOnActionMediaPlayer.release("crowdGoalHome2")
-                Log.d("SOUND", "completed crowdHomeGoal2")
+        val stringFileName = "crowdGoalHome"
+
+        if (crowdOnActionMediaPlayer?.isPlaying == true) {
+            crowdOnActionMediaPlayer?.stop(stringFileName)
+            crowdOnActionMediaPlayer?.reset(stringFileName)
+        }
+
+
+        val assetFileDescriptor = context.resources.openRawResourceFd(idResource) ?: return
+
+        crowdOnActionMediaPlayer = MediaPlayer().apply {
+            setOnPreparedListener {
+                start(stringFileName)
             }
+
+            setOnCompletionListener {
+                reset(stringFileName)
+                if (idResource == R.raw.crowd_goal_home_2) return@setOnCompletionListener
+                crowdGoalHome(R.raw.crowd_goal_home_2)
+            }
+        }
+
+        crowdOnActionMediaPlayer?.run {
+            reset(stringFileName)
+            setDataSource(
+                assetFileDescriptor.fileDescriptor,
+                assetFileDescriptor.startOffset,
+                assetFileDescriptor.declaredLength
+            )
+            prepareAsync()
         }
     }
 
     fun crowdGoalAway() {
         if (!crowdEnabled) return
-        crowdOnActionMediaPlayer = MediaPlayer.create(context, R.raw.crowd_goal_away)
-        crowdOnActionMediaPlayer.start("crowdAwayGoal")
-        Log.d("SOUND", "playing crowdAwayGoal")
-        crowdOnActionMediaPlayer.setOnCompletionListener {
-            crowdOnActionMediaPlayer.reset("crowdAwayGoal")
-            crowdOnActionMediaPlayer.release("crowdAwayGoal")
-            Log.d("SOUND", "completed crowdAwayGoal")
+        val stringFileName = "crowdAwayGoal"
+
+        if (crowdOnActionMediaPlayer?.isPlaying == true) {
+            crowdOnActionMediaPlayer?.stop(stringFileName)
+            crowdOnActionMediaPlayer?.reset(stringFileName)
+        }
+
+        val assetFileDescriptor =
+            context.resources.openRawResourceFd(R.raw.crowd_goal_away) ?: return
+
+        crowdOnActionMediaPlayer = MediaPlayer().apply {
+            setOnPreparedListener {
+                start(stringFileName)
+            }
+
+            setOnCompletionListener {
+                reset(stringFileName)
+            }
+        }
+
+        crowdOnActionMediaPlayer?.run {
+            reset(stringFileName)
+            setDataSource(
+                assetFileDescriptor.fileDescriptor,
+                assetFileDescriptor.startOffset,
+                assetFileDescriptor.declaredLength
+            )
+            prepareAsync()
         }
     }
 
     fun crowdPenaltyScored() {
         if (!crowdEnabled) return
-        crowdOnActionMediaPlayer = MediaPlayer.create(context, R.raw.crowd_goal_home)
-        crowdOnActionMediaPlayer.start("media")
-        crowdOnActionMediaPlayer.setOnCompletionListener {
-            crowdOnActionMediaPlayer.reset("crowdPenaltyScored")
-            crowdOnActionMediaPlayer.release("crowdPenaltyScored")
+        val stringFileName = "crowdPenaltyScored"
+
+        if (crowdOnActionMediaPlayer?.isPlaying == true) {
+            crowdOnActionMediaPlayer?.stop(stringFileName)
+            crowdOnActionMediaPlayer?.reset(stringFileName)
+        }
+
+        val assetFileDescriptor =
+            context.resources.openRawResourceFd(R.raw.crowd_goal_home) ?: return
+
+        crowdOnActionMediaPlayer = MediaPlayer().apply {
+            setOnPreparedListener {
+                start(stringFileName)
+            }
+
+            setOnCompletionListener {
+                reset(stringFileName)
+            }
+        }
+
+        crowdOnActionMediaPlayer?.run {
+            reset(stringFileName)
+            setDataSource(
+                assetFileDescriptor.fileDescriptor,
+                assetFileDescriptor.startOffset,
+                assetFileDescriptor.declaredLength
+            )
+            prepareAsync()
         }
     }
 
     fun crowdPenaltyMissed() {
         if (!crowdEnabled) return
-        crowdOnActionMediaPlayer = MediaPlayer.create(context, R.raw.crowd_penalties_miss)
-        crowdOnActionMediaPlayer.start("crowdPenaltyMissed")
-        crowdOnActionMediaPlayer.setOnCompletionListener {
-            crowdOnActionMediaPlayer.reset("crowdPenaltyMissed")
-            crowdOnActionMediaPlayer.release("crowdPenaltyMissed")
+        val stringFileName = "crowdPenaltyMissed"
+
+        if (crowdOnActionMediaPlayer?.isPlaying == true) {
+            crowdOnActionMediaPlayer?.stop(stringFileName)
+            crowdOnActionMediaPlayer?.reset(stringFileName)
+        }
+
+        val assetFileDescriptor =
+            context.resources.openRawResourceFd(R.raw.crowd_penalties_miss) ?: return
+
+        crowdOnActionMediaPlayer = MediaPlayer().apply {
+            setOnPreparedListener {
+                start(stringFileName)
+            }
+
+            setOnCompletionListener {
+                reset(stringFileName)
+            }
+        }
+
+        crowdOnActionMediaPlayer?.run {
+            reset(stringFileName)
+            setDataSource(
+                assetFileDescriptor.fileDescriptor,
+                assetFileDescriptor.startOffset,
+                assetFileDescriptor.declaredLength
+            )
+            prepareAsync()
         }
     }
 
-    fun crowdBackground() {
-        if (!crowdEnabled) return
-        try {
-            if (this::crowdBackgroundMediaPlayer.isInitialized && crowdBackgroundMediaPlayer.isPlaying) {
-                if (isCrowdBackgroundPlayerOnStartupSound) {
-                    crowdBackgroundMediaPlayer.stop("crowdBackgroundMediaPlayer")
-                    crowdBackgroundMediaPlayer.reset("crowdBackgroundMediaPlayer")
-                    crowdBackgroundMediaPlayer.release("crowdBackgroundMediaPlayer")
-                    isCrowdBackgroundPlayerOnStartupSound = false
-                } else {
+    fun stopCrowdGoals() {
+        if (crowdOnActionMediaPlayer?.isPlaying == true) {
+            crowdOnActionMediaPlayer?.stop("crowdOnActionMediaPlayer")
+            crowdOnActionMediaPlayer?.reset("crowdOnActionMediaPlayer")
+        }
+    }
 
-                    if (this::crowdOnActionMediaPlayer.isInitialized && crowdOnActionMediaPlayer.isPlaying) {
-                        crowdOnActionMediaPlayer.stop("crowdBackgroundMediaPlayer")
-                        crowdOnActionMediaPlayer.reset("crowdBackgroundMediaPlayer")
-                        crowdOnActionMediaPlayer.release("crowdBackgroundMediaPlayer")
-                    }
-                    return
-                }
+    fun crowdBackground(id: Int) {
+        if (!crowdEnabled) return
+        val stringFileName = "$id"
+        try {
+            if (crowdBackgroundMediaPlayer?.isPlaying == true) {
+                crowdBackgroundMediaPlayer?.stop(stringFileName)
+                crowdBackgroundMediaPlayer?.reset(stringFileName)
+                // Here we need release to flush previous audio from crowd background startup scoreboard
+                crowdBackgroundMediaPlayer?.release(stringFileName)
             }
+            stopCrowdGoals()
         } catch (e: Exception) {
-            Log.d("ERRORE ISPLAYING", e.toString())
+            Log.e("ERRORE ISPLAYING", e.toString())
         }
 
-        crowdBackgroundMediaPlayer = MediaPlayer.create(context, R.raw.crowd_background)
-        crowdBackgroundMediaPlayer.start("crowdBackground")
-        Log.d("SOUND", "playing crowdBackground")
+        val assetFileDescriptor = context.resources.openRawResourceFd(id) ?: return
 
-        crowdBackgroundMediaPlayer.setOnCompletionListener {
-            crowdBackgroundMediaPlayer.reset("crowdBackground")
-            Log.d("SOUND", "stopped crowdBackground")
-            crowdBackgroundMediaPlayer = MediaPlayer.create(context, R.raw.crowd_background_2)
-            crowdBackgroundMediaPlayer.start("crowdBackground2")
-            Log.d("SOUND", "playing crowdBackground2")
+        crowdBackgroundMediaPlayer = MediaPlayer().apply {
+            setOnPreparedListener {
+                start(stringFileName)
+            }
 
-            crowdBackgroundMediaPlayer.setOnCompletionListener {
-                crowdBackgroundMediaPlayer.reset("crowdBackground2")
-                Log.d("SOUND", "stopped crowdBackground2")
-
-                crowdBackgroundMediaPlayer = MediaPlayer.create(context, R.raw.crowd_background_3)
-                crowdBackgroundMediaPlayer.start("crowdBackground3")
-                Log.d("SOUND", "playing crowdBackground3")
-
-                crowdBackgroundMediaPlayer.setOnCompletionListener {
-                    crowdBackgroundMediaPlayer.reset("crowdBackground3")
-                    Log.d("SOUND", "stopped crowdBackground3")
-
-                    crowdBackgroundMediaPlayer =
-                        MediaPlayer.create(context, R.raw.crowd_background_4)
-                    crowdBackgroundMediaPlayer.start("crowdBackground4")
-                    Log.d("SOUND", "playing crowdBackground4")
-
-                    crowdBackgroundMediaPlayer.setOnCompletionListener {
-                        crowdBackgroundMediaPlayer.reset("crowdBackground4")
-                        Log.d("SOUND", "stopped crowdBackground4")
-
-                        crowdBackgroundMediaPlayer =
-                            MediaPlayer.create(context, R.raw.crowd_background_5)
-                        crowdBackgroundMediaPlayer.start("crowdBackground5")
-                        Log.d("SOUND", "playing crowdBackground5")
-
-                        crowdBackgroundMediaPlayer.setOnCompletionListener {
-                            crowdBackgroundMediaPlayer.reset("crowdBackground5")
-                            crowdBackgroundMediaPlayer.release("crowdBackground4")
-                            Log.d("SOUND", "stopped crowdBackground5")
-                            this.crowdBackground()
-                            Log.d("SOUND", "Recursive function crowdBackground()")
-                        }
+            setOnCompletionListener {
+                reset(stringFileName)
+                when (id) {
+                    R.raw.crowd_background -> {
+                        crowdBackground(R.raw.crowd_background_2)
+                        Log.d("CROWDBACKGROUND PLAYING", "crowd_background_2")
+                    }
+                    R.raw.crowd_background_2 -> {
+                        crowdBackground(R.raw.crowd_background_3)
+                        Log.d("CROWDBACKGROUND PLAYING", "crowd_background_3")
+                    }
+                    R.raw.crowd_background_3 -> {
+                        crowdBackground(R.raw.crowd_background_4)
+                        Log.d("CROWDBACKGROUND PLAYING", "crowd_background_4")
+                    }
+                    R.raw.crowd_background_4 -> {
+                        crowdBackground(R.raw.crowd_background_5)
+                        Log.d("CROWDBACKGROUND PLAYING", "crowd_background_5")
+                    }
+                    else -> {
+                        crowdBackground(R.raw.crowd_background)
+                        Log.v("CROWDBACKGROUND PLAYING", "crowd_background")
                     }
                 }
             }
+        }
+
+        crowdBackgroundMediaPlayer?.run {
+            reset(stringFileName)
+            setDataSource(
+                assetFileDescriptor.fileDescriptor,
+                assetFileDescriptor.startOffset,
+                assetFileDescriptor.declaredLength
+            )
+            prepareAsync()
         }
     }
 
     fun stopAll() {
         if (!crowdEnabled) return
-        if (this::crowdOnActionMediaPlayer.isInitialized) {
-            crowdOnActionMediaPlayer.stop("crowdOnActionMediaPlayer")
-            crowdOnActionMediaPlayer.reset("crowdOnActionMediaPlayer")
-            crowdOnActionMediaPlayer.release("crowdOnActionMediaPlayer")
-        }
 
-        if (this::crowdBackgroundMediaPlayer.isInitialized) {
-            crowdBackgroundMediaPlayer.stop("crowdBackgroundMediaPlayer")
-            crowdBackgroundMediaPlayer.reset("crowdBackgroundMediaPlayer")
-            crowdBackgroundMediaPlayer.release("crowdBackgroundMediaPlayer")
-        }
+        crowdOnActionMediaPlayer?.stop("crowdOnActionMediaPlayer")
+        crowdOnActionMediaPlayer?.reset("crowdOnActionMediaPlayer")
+        crowdOnActionMediaPlayer?.release("crowdOnActionMediaPlayer")
+        crowdOnActionMediaPlayer = null
 
-        if (this::refereeMediaPlayer.isInitialized) {
-            refereeMediaPlayer.stop("refereeMediaPlayer")
-            refereeMediaPlayer.reset("refereeMediaPlayer")
-            refereeMediaPlayer.release("refereeMediaPlayer")
-        }
+        crowdBackgroundMediaPlayer?.stop("crowdBackgroundMediaPlayer")
+        crowdBackgroundMediaPlayer?.reset("crowdBackgroundMediaPlayer")
+        crowdBackgroundMediaPlayer?.release("crowdBackgroundMediaPlayer")
+        crowdBackgroundMediaPlayer = null
+
+        refereeMediaPlayer?.stop("refereeMediaPlayer")
+        refereeMediaPlayer?.reset("refereeMediaPlayer")
+        refereeMediaPlayer?.release("refereeMediaPlayer")
+        refereeMediaPlayer = null
     }
 }
 
@@ -198,15 +335,7 @@ fun MediaPlayer.reset(file: String) {
     try {
         this.reset()
     } catch (e: Exception) {
-        Log.d("ERRORE RESET $file", e.toString())
-    }
-}
-
-fun MediaPlayer.pause(file: String) {
-    try {
-        this.pause()
-    } catch (e: Exception) {
-        Log.d("ERRORE PAUSE $file", e.toString())
+        Log.e("ERRORE RESET $file", e.toString())
     }
 }
 
@@ -214,7 +343,7 @@ fun MediaPlayer.stop(file: String) {
     try {
         this.stop()
     } catch (e: Exception) {
-        Log.d("ERRORE STOP $file", e.toString())
+        Log.e("ERRORE STOP $file", e.toString())
     }
 }
 
@@ -222,7 +351,7 @@ fun MediaPlayer.release(file: String) {
     try {
         this.release()
     } catch (e: Exception) {
-        Log.d("ERRORE RELEASE $file", e.toString())
+        Log.e("ERRORE RELEASE $file", e.toString())
     }
 }
 
@@ -230,6 +359,6 @@ fun MediaPlayer.start(file: String) {
     try {
         this.start()
     } catch (e: Exception) {
-        Log.d("ERRORE START $file", e.toString())
+        Log.e("ERRORE START $file", e.toString())
     }
 }
