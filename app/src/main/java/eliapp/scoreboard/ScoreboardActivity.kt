@@ -85,18 +85,21 @@ class ScoreboardActivity : AppCompatActivity() {
         homePointTextView = findViewById(R.id.homePointTextView)
         homePointTextView.isClickable = true
         homePointTextView.setOnClickListener {
-            it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY, HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING)
-            if (regularTimeTimerIsRunning) {
-                soundManager.crowdGoalHome(R.raw.crowd_goal_home)
-                regularTimeTimerIsRunning = false
-                homePointValue+=1
-                homePointTextView.text = "$homePointValue"
-                additionalBottomTextView.text = getString(R.string.goal_team, configuration.homeName)
-            } else if (currentMatchTime == MatchTime.Penalties) {
-                homePointValue+=1
-                homePointTextView.text = "$homePointValue"
-                soundManager.crowdPenaltyScored()
-            }
+            tapOnHomeScoreAction(it)
+        }
+    }
+    private fun tapOnHomeScoreAction(it: View) {
+        it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY, HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING)
+        if (regularTimeTimerIsRunning) {
+            soundManager.crowdGoalHome(R.raw.crowd_goal_home)
+            regularTimeTimerIsRunning = false
+            homePointValue+=1
+            homePointTextView.text = "$homePointValue"
+            additionalBottomTextView.text = getString(R.string.goal_team, configuration.homeName)
+        } else if (currentMatchTime == MatchTime.Penalties) {
+            homePointValue+=1
+            homePointTextView.text = "$homePointValue"
+            soundManager.crowdPenaltyScored()
         }
     }
 
@@ -106,22 +109,25 @@ class ScoreboardActivity : AppCompatActivity() {
         awayPointTextView = findViewById(R.id.awayPointTextView)
         awayPointTextView.isClickable = true
         awayPointTextView.setOnClickListener {
-            it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY, HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING)
-            if (regularTimeTimerIsRunning) {
-                if (configuration.homeFactor) {
-                    soundManager.crowdGoalAway()
-                } else {
-                    soundManager.crowdGoalHome(R.raw.crowd_goal_home)
-                }
-                regularTimeTimerIsRunning = false
-                awayPointValue+=1
-                awayPointTextView.text = "$awayPointValue"
-                additionalBottomTextView.text = getString(R.string.goal_team, configuration.awayName)
-            } else if (currentMatchTime == MatchTime.Penalties) {
-                awayPointValue+=1
-                awayPointTextView.text = "$awayPointValue"
-                soundManager.crowdPenaltyScored()
+            tapOnAwayScoreAction(it)
+        }
+    }
+    private fun tapOnAwayScoreAction(it: View) {
+        it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY, HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING)
+        if (regularTimeTimerIsRunning) {
+            if (configuration.homeFactor) {
+                soundManager.crowdGoalAway()
+            } else {
+                soundManager.crowdGoalHome(R.raw.crowd_goal_home)
             }
+            regularTimeTimerIsRunning = false
+            awayPointValue+=1
+            awayPointTextView.text = "$awayPointValue"
+            additionalBottomTextView.text = getString(R.string.goal_team, configuration.awayName)
+        } else if (currentMatchTime == MatchTime.Penalties) {
+            awayPointValue+=1
+            awayPointTextView.text = "$awayPointValue"
+            soundManager.crowdPenaltyScored()
         }
     }
 
@@ -132,35 +138,38 @@ class ScoreboardActivity : AppCompatActivity() {
         timeTextView = findViewById(R.id.timeTextView)
         timeTextView.isClickable = true
         timeTextView.setOnClickListener {
-            if (!keepCrowdBackground) {
-                soundManager.crowdBackground(R.raw.crowd_background)
-                keepCrowdBackground = true
-            }
-            if (currentMatchTime == MatchTime.Penalties || currentMatchTime == MatchTime.EndGame) {
-                return@setOnClickListener
-            }
-            it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY, HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING)
-            soundManager.stopCrowdGoals()
-            regularTimeTimerIsRunning = !regularTimeTimerIsRunning
-            additionalBottomTextView.text = null
-            if (!regularTimeTimerIsRunning) {
-                soundManager.refereeAction(R.raw.foul)
-                createRegularTimeCounter()
-            } else {
-                object  : CountDownTimer(3000, 1000) {
-                    override fun onTick(millisUntilFinished: Long) {
-                        additionalUpTextView.text = countDownToStart.toString()
-                        countDownToStart--
-                    }
+            tapOnTimeAction(it)
+        }
+    }
+    private fun tapOnTimeAction(it: View) {
+        if (!keepCrowdBackground) {
+            soundManager.crowdBackground(R.raw.crowd_background)
+            keepCrowdBackground = true
+        }
+        if (currentMatchTime == MatchTime.Penalties || currentMatchTime == MatchTime.EndGame) {
+            return
+        }
+        it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY, HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING)
+        soundManager.stopCrowdGoals()
+        regularTimeTimerIsRunning = !regularTimeTimerIsRunning
+        additionalBottomTextView.text = null
+        if (!regularTimeTimerIsRunning) {
+            soundManager.refereeAction(R.raw.foul)
+            createRegularTimeCounter()
+        } else {
+            object  : CountDownTimer(3000, 1000) {
+                override fun onTick(millisUntilFinished: Long) {
+                    additionalUpTextView.text = countDownToStart.toString()
+                    countDownToStart--
+                }
 
-                    override fun onFinish() {
-                        soundManager.refereeAction(R.raw.foul)
-                        countDownToStart = 3
-                        setAdditionalUpTextViewAndSetAudio()
-                        createRegularTimeCounter()
-                    }
-                }.start()
-            }
+                override fun onFinish() {
+                    soundManager.refereeAction(R.raw.foul)
+                    countDownToStart = 3
+                    setAdditionalUpTextViewAndSetAudio()
+                    createRegularTimeCounter()
+                }
+            }.start()
         }
     }
 
