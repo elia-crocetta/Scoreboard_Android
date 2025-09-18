@@ -31,9 +31,6 @@ build/
 .navigation
 captures/
 output.json 
-local.properties
-.gradle/*
-.idea/*
     
 #NDK
 obj/
