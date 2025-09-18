@@ -1,6 +1,6 @@
 # [ITA] ⚽ Scoreboard
 
-Scoreboard è un'app Android costruita in **Kotlin** con architettura **Single Activity**, progettata per gestire un tabellone segnapunti interattivo per partite di calcio con esperienza realistica di match.
+Scoreboard è un'app Android costruita in **Kotlin** con architettura **Single Activity**, progettata per gestire un tabellone segnapunti interattivo per partite di Subbuteo con esperienza realistica di match.
 
 ---
 
@@ -129,7 +129,7 @@ Realizzato da **Elia Crocetta**
 
 # [ENG] ⚽ Scoreboard
 
-Scoreboard is an Android app built in **Kotlin** with **Single Activity** architecture, designed to manage an interactive football match scoreboard with realistic match experience.
+Scoreboard is an Android app built in **Kotlin** with **Single Activity** architecture, designed to manage an interactive Subbuteo match scoreboard with realistic match experience.
 
 ---
 
